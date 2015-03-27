@@ -1,6 +1,6 @@
 
 BINARY      = bin/Asteroids.sfc
-API_MODULES = reset-snes block screen math random
+API_MODULES = reset-snes block screen math random metasprite
 API_DIR     = snesdev-common
 CONFIG      = LOROM_1MBit_copyright
 
