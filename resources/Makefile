@@ -1,7 +1,7 @@
 
 META = 
 MAPS = 
-TILES = 
+TILES = ship.4bpp missile.4bpp asteroids.4bpp
 MODE7 = 
 
 MODE7TILES = $(patsubst %,%.pc7,$(MODE7))
