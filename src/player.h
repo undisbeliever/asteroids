@@ -10,6 +10,9 @@
 IMPORT_MODULE Player
 	STRUCT	entity, EntityStruct
 
+	;; Initializes the player
+	;; REQUIRE: DB access shadow RAM
+	ROUTINE	Init
 ENDMODULE
 
 .endif ; __PLAYER_H_

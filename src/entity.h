@@ -62,6 +62,23 @@ PROJECTILE_ENTITY_MALLOC = 20
 ;; ::TODO move into config.h::
 N_PROJECTILES = 4
 
+;; A table of functions used to handle behaviour of the player.
+.struct PlayerEntityFunctionsTable
+	;; Called once per frame, before physics
+	;; Should modify xVecl, yVecl, metaSpriteFrame
+	;; May set the Entity's `functionsTable` to NULL to delete the entity.
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; INPUT: dp = EntityStruct address
+	Process			.addr
+
+	;; Called once per frame, after Process
+	;; Should modify xPos, yPos
+	;; MUST NOT set the Entity's `functionsTable` to NULL to delete the entity.
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; INPUT: dp = EntityStruct address
+	Physics			.addr
+.endstruct
+
 ;; A table of functions used to handle behaviour of the npcs.
 .struct NpcEntityFunctionsTable
 	;; Called when npc is created.
@@ -252,6 +269,12 @@ IMPORT_MODULE Entity
 	;; PARAM:
 	;;	player - the memory location of the player's struct
 	.macro Entity__Process player
+		; dp = player
+		; if dp->functionsTable
+		;	dp->functionsTable->Process(dp)
+		;	if dp->functionsTable
+		;		dp->functionsTable->Physics(dp)
+		;
 		; for dp in firstActiveProjectile linked list
 		;	if dp->functionsTable
 		;		dp->functionsTable->Process(dp)
@@ -278,6 +301,16 @@ IMPORT_MODULE Entity
 
 		.A16
 		.I16
+
+		LDA	#player
+		TCD
+		LDX	z:EntityStruct::functionsTable
+		IF_NOT_ZERO
+			JSR	(PlayerEntityFunctionsTable::Process, X)
+
+			LDX	z:EntityStruct::functionsTable
+			JSR	(PlayerEntityFunctionsTable::Physics, X)
+		ENDIF
 
 		LDA	Entity__firstActiveProjectile
 		IF_NOT_ZERO
@@ -349,8 +382,22 @@ EnterLoop:
 	;;		STATE: 16 bit A, 16 bit Index, DB = $7E
 	;;		INPUT: dp = Entity
 	.macro Entity__Render player, DrawEntityRoutine
+		; dp = player
+		; if dp->functionsTable
+		;	DrawEntityRoutine(dp)
+		;
+		; _Entity__Render_List(Entity__firstActiveProjectile, Entity__firstFreeProjectile, DrawEntityRoutine)
+		; _Entity__Render_List(Entity__firstActiveNpc, Entity__firstFreeNpc, DrawEntityRoutine)
+
 		.A16
 		.I16
+
+		LDA	#player
+		TCD
+		LDX	z:EntityStruct::functionsTable
+		IF_NOT_ZERO
+			JSR	DrawEntityRoutine
+		ENDIF
 
 		_Entity__Render_List Entity__firstActiveProjectile, Entity__firstFreeProjectile, DrawEntityRoutine
 		_Entity__Render_List Entity__firstActiveNpc, Entity__firstFreeNpc, DrawEntityRoutine

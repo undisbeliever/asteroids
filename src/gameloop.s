@@ -34,6 +34,8 @@ ROUTINE Init
 	REP	#$20
 .A16
 .I16
+	JSR	Player__Init
+
 	; ::DEBUG projectile to test collisions::
 	LDX	#(256 - 8) / 2
 	LDY	#(224 - 8) / 2
