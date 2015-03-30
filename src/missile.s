@@ -6,6 +6,7 @@
 .include "routines/metasprite.h"
 
 .include "entity.h"
+.include "physics.h"
 
 MODULE Missile
 
@@ -13,9 +14,9 @@ MODULE Missile
 LABEL	EntityFunctionsTable
 	.addr	.loword(Init)
 	.addr	.loword(Process)
+	.addr	.loword(Physics__ProcessEntity)
 	.addr	.loword(CollisionNpc)
 	.addr	.loword(CollisionPlayer)
-	.addr	.loword(Finalize)
 
 
 .code
@@ -36,7 +37,7 @@ ROUTINE Process
 .I16
 ROUTINE CollisionNpc
 	; ::DEBUG collision test - set NPC palette to 2::
-	LDA	#2 << OAM_CHARATTR_PALETTE_SHIFT
+	LDA	#1 << OAM_CHARATTR_PALETTE_SHIFT
 	STA	z:EntityStruct::metaSpriteCharAttr
 
 	RTS
@@ -44,7 +45,6 @@ ROUTINE CollisionNpc
 .A16
 .I16
 ROUTINE CollisionPlayer
-ROUTINE Finalize
 	RTS
 
 
@@ -63,31 +63,15 @@ LABEL InitData
 	.byte	$00, $00, $00			; xPos
 	.byte	$00, $00, $00			; yPos
 
-	.word	$00				; xVecl
-	.word	$00				; yVecl
+	.word	.loword(100)			; xVecl
+	.word	.loword(-100)			; yVecl
 
-	.addr	Missile_Size_1			; sizePtr
+	.addr	Missile_Size			; sizePtr
 
-	.addr	Missile_MetaSpriteFrame		; metaSpriteFrame
+	.addr	MetaSprite_Missile_8		; metaSpriteFrame
 	.word	0				; charAttr
 
-
-;; Missile size data
-Missile_Size_1:
-	.word	8				; width
-	.word	8				; height
-	.byte	1				; tileWidth 
-	.byte	1				; tileHeight
-
-
-; ::DEBUG Simple metasprite::
-Missile_MetaSpriteFrame:
-	.byte	1
-
-	.byte	0				; xPos
-	.byte	0				; yPos
-	.word	1 << OAM_CHARATTR_PALETTE_SHIFT	; charAttr
-	.byte	0				; size
+.include "tables/metasprite-missile.asm"
 
 
 ENDMODULE

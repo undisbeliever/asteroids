@@ -1,11 +1,12 @@
 
+.include "asteroid.h"
 .include "includes/synthetic.inc"
 .include "includes/structure.inc"
 .include "includes/registers.inc"
 .include "routines/metasprite.h"
 
 .include "entity.h"
-.include "asteroid.h"
+.include "physics.h"
 
 MODULE Asteroid
 
@@ -13,9 +14,9 @@ MODULE Asteroid
 LABEL	EntityFunctionsTable
 	.addr	.loword(Init)
 	.addr	.loword(Process)
+	.addr	.loword(Physics__ProcessEntity)
 	.addr	.loword(CollisionPlayer)
 	.addr	.loword(CollisionProjectile)
-	.addr	.loword(Finalize)
 
 
 .code
@@ -29,11 +30,7 @@ ROUTINE Init
 .A16
 .I16
 ROUTINE Process
-	;; ::DEBUG physics::
 	LDA	z:EntityStruct::xPos + 1
-	INC
-	STA	z:EntityStruct::xPos + 1
-
 	CMP	#26
 	IF_EQ
 		; ::DEBUG Check it doesn't crash::
@@ -77,32 +74,15 @@ LABEL InitData
 	.byte	$00, $00, $00			; xPos
 	.byte	$00, $00, $00			; yPos
 
-	.word	$00				; xVecl
-	.word	$00				; yVecl
+	.word	.loword(256)			; xVecl
+	.word	.loword(0)			; yVecl
 
-	.addr	Asteroid_Size_1			; sizePtr
+	.addr	SmallAsteroid_Size		; sizePtr
 
-	.addr	Asteroid_MetaSpriteFrame	; metaSpriteFrame
+	.addr	MetaSprite_SmallAsteroid_2	; metaSpriteFrame
 	.word	0				; charAttr
 
-
-;; Asteroid size data
-Asteroid_Size_1:
-	.word	8				; width
-	.word	8				; height
-	.byte	1				; tileWidth 
-	.byte	1				; tileHeight
-
-
-; ::DEBUG Simple metasprite::
-Asteroid_MetaSpriteFrame:
-	.byte	1
-
-	.byte	0	; xPos
-	.byte	0	; yPos
-	.word	0	; charAttr
-	.byte	0	; size
-
+.include "tables/metasprite-asteroid.asm"
 
 ENDMODULE
 

@@ -3,7 +3,7 @@
 ;; It provides:
 ;;	* Dynamic memory allocation
 ;;	* collision detection
-;;	* ::TODO Physics::
+;;	* Physics Hook
 ;;	* ::TODO out of scope detection::
 ;;
 ;; This module manages entities in 3 seperate lists:
@@ -45,7 +45,6 @@
 .setcpu "65816"
 .include "includes/import_export.inc"
 .include "includes/structure.inc"
-.include "routines/metasprite.h"
 
 ;; Number of bytes allocated to an npc.
 ;; ::TODO move into config.h::
@@ -73,27 +72,29 @@ N_PROJECTILES = 4
 	;; Called once per frame, before physics
 	;; Should modify xVecl, yVecl, metaSpriteFrame
 	;; May set the Entity's `functionsTable` to NULL to delete the entity.
-	;; REQUIRES: 16 bit A, 16 bit Index
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT: dp = EntityStruct address
 	Process			.addr
 
+	;; Called once per frame, after Process
+	;; Should modify xPos, yPos
+	;; MUST NOT set the Entity's `functionsTable` to NULL to delete the entity.
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; INPUT: dp = EntityStruct address
+	Physics			.addr
+
 	;; Called when the player collides with the npc
-	;; REQUIRES: 16 bit A, 16 bit Index
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT:
 	;;	dp: EntityStruct NPC address
 	CollisionPlayer		.addr
 
 	;; Called when an npc collides with a projectile
-	;; REQUIRES: 16 bit A, 16 bit Index
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT:
 	;;	dp: EntityStruct address of npc
 	;;	y: EntityStruct projectile address
 	CollisionProjectile	.addr
-
-	;; Called when the entity is dead.
-	;; REQUIRES: 8 bit A, 16 bit Index
-	;; INPUT: dp: EntityStruct address
-	Finalize		.addr
 .endstruct
 
 ;; A table of functions used to handle behaviour of the projectiles
@@ -109,6 +110,13 @@ N_PROJECTILES = 4
 	;; INPUT: dp = EntityStruct address
 	Process			.addr
 
+	;; Called once per frame, after Process
+	;; Should modify xPos, yPos
+	;; MUST NOT set the Entity's `functionsTable` to NULL to delete the entity.
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; INPUT: dp = EntityStruct address
+	Physics			.addr
+
 	;; Called when the projectile collides with a npc
 	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT:
@@ -121,11 +129,6 @@ N_PROJECTILES = 4
 	;; INPUT:
 	;; 	dp: Projectile address
 	CollisionPlayer		.addr
-
-	;; Called when the entity is dead.
-	;; REQUIRES: 8 bit A, 16 bit Index
-	;; INPUT: dp: Projectile address
-	Finalize		.addr
 .endstruct
 
 ;; A struct that holds the size data of the entity
@@ -253,7 +256,7 @@ IMPORT_MODULE Entity
 		;	if dp->functionsTable
 		;		dp->functionsTable->Process(dp)
 		;		if dp->functionsTable
-		;			// ::TODO physics::
+		;			dp->functionsTable->Physics(dp)
 		;			Entity__CheckEntityPlayerCollision(dp, player, PlayerProjectileCollisionRoutine, ProjectileEntityFunctionsTable::CollisionPlayer)
 		;
 		; for dp in firstActiveNpc linked list
@@ -264,7 +267,7 @@ IMPORT_MODULE Entity
 		;	if dp->functionsTable == NULL
 		;		continue
 		;
-		;	// ::TODO physics::
+		;	dp->functionsTable->Physics(dp)
 		;
 		;	Entity__CheckEntityPlayerCollision(dp, player, PlayerNpcCollisionRoutine, NpcEntityFunctionsTable::CollisionPlayer)
 		;
@@ -287,7 +290,7 @@ IMPORT_MODULE Entity
 
 					LDX	z:EntityStruct::functionsTable
 					IF_NOT_ZERO
-						; ::TODO physics::
+						JSR	(ProjectileEntityFunctionsTable::Physics, X)
 
 						Entity__CheckEntityPlayerCollision player, ProjectileEntityFunctionsTable::CollisionPlayer
 					ENDIF
@@ -320,7 +323,7 @@ EnterLoop:
 			LDX	z:EntityStruct::functionsTable
 			BEQ	CONTINUE_LABEL
 
-			; ::TODO physics::
+			JSR	(NpcEntityFunctionsTable::Physics, X)
 
 			Entity__CheckEntityPlayerCollision player, NpcEntityFunctionsTable::CollisionPlayer
 			LDX	z:EntityStruct::functionsTable
@@ -338,26 +341,28 @@ EnterLoop:
 	;; using the Process loop.
 	;;
 	;; REQUIRES: 16 bit A, 16 bit Index, DB=$7E
-	.macro Entity__Render player, screenXpos, screenYpos
+	;;
+	;; PARAM:
+	;;	player: the player's EntityStruct
+	;; 	DrawEntityRoutine:
+	;;		A routine that draws the entity on the screen
+	;;		STATE: 16 bit A, 16 bit Index, DB = $7E
+	;;		INPUT: dp = Entity
+	.macro Entity__Render player, DrawEntityRoutine
 		.A16
 		.I16
 
-		_Entity__Render_List Entity__firstActiveProjectile, Entity__firstFreeProjectile, screenXpos, screenYpos
-		_Entity__Render_List Entity__firstActiveNpc, Entity__firstFreeNpc, screenXpos, screenYpos
+		_Entity__Render_List Entity__firstActiveProjectile, Entity__firstFreeProjectile, DrawEntityRoutine
+		_Entity__Render_List Entity__firstActiveNpc, Entity__firstFreeNpc, DrawEntityRoutine
 	.endmacro
 
-	.macro _Entity__Render_List firstActive, firstFree, screenXpos, screenYpos
+	.macro _Entity__Render_List firstActive, firstFree, DrawEntityRoutine
 		; previousEntity = NULL
 		; dp = firstActive
 		; while dp != NULL
 		;	if dp->functionsTable != 0
 		;		// ::TODO animation::
-		;
-		;		MetaSprite__xPos = int(dp->xPos) - screenXpos
-		;		MetaSprite__yPos = int(dp->yPos) - screenYpos
-		;		// ::TODO check if outside playfield::
-		;
-		;		MetaSprite__ProcessMetaSprite_Y(dp->metaSpriteFrame, dp->metaSpriteCharAttr)
+		;		DrawEntityRoutine()
 		;
 		;		previousEntity = dp
 		;		dp = dp->nextEntity
@@ -384,26 +389,7 @@ EnterLoop:
 				IF_NOT_ZERO
 					; ::TODO animation::
 
-					LDA	z:EntityStruct::xPos + 1
-					SUB	screenXpos
-					STA	MetaSprite__xPos
-
-					LDA	z:EntityStruct::yPos + 1
-					SUB	screenYpos
-					STA	MetaSprite__yPos
-
-					; ::TODO check if outside playfield::
-
-
-					; ::TODO replace with macro (xPos, yPos, frame, charattr are paraeters::
-					; ::TODO use DB = MetaSpriteLayoutBank, saves (n_entities + 4*obj - 7) cycles::
-					; ::: Will require MetaSpriteLayoutBank & $7F <= $3F::
-					LDX	z:EntityStruct::metaSpriteFrame
-					LDY	z:EntityStruct::metaSpriteCharAttr
-
-					SEP	#$20
-					JSR	MetaSprite__ProcessMetaSprite_Y
-					REP	#$20
+					JSR	DrawEntityRoutine
 
 					TDC
 					STA	Entity__previousEntity
@@ -572,7 +558,7 @@ EnterLoop:
 					LDA	entityOffset + EntityStruct::xPos + 1
 					CMP	a:EntityStruct::xPos + 1, Y
 					IF_LT
-						; carry clear, A = npc->x
+						; carry clear, A = entity->xPos
 						LDX	entityOffset + EntityStruct::sizePtr
 						ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::width, X
 						CMP	a:EntityStruct::xPos + 1, Y
@@ -589,14 +575,14 @@ EnterLoop:
 					LDA	entityOffset + EntityStruct::yPos + 1
 					CMP	a:EntityStruct::yPos + 1, Y
 					IF_LT
+						; carry clear, A = entity->yPos
 						LDX	entityOffset + EntityStruct::sizePtr
-						; carry clear, A = npc->y
 						ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::height, X
 						CMP	a:EntityStruct::yPos + 1, Y
 						BLT	ContinueProjectileLoop
 					ELSE
 						LDX	a:EntityStruct::sizePtr, Y
-						LDA	a:EntityStruct::xPos + 1, Y
+						LDA	a:EntityStruct::yPos + 1, Y
 						CLC
 						ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::height, X
 						CMP	entityOffset + EntityStruct::yPos + 1

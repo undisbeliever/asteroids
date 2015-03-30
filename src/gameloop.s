@@ -88,7 +88,7 @@ LABEL GameLoop
 .A16
 .I16
 			Entity__Process Player__entity
-			Entity__Render Player__entity, screenXpos, screenYpos
+			Entity__Render Player__entity, DrawEntity
 		PLB
 
 		SEP	#$20
@@ -97,6 +97,42 @@ LABEL GameLoop
 	FOREVER
 
 	RTS
+
+
+
+;; Draws an Entity on the screen
+;; REQUIRES: 16 bit A, 16 bit Index, DB=$7E
+;; INPUT: dp = EntityStruct
+.A16
+.I16
+ROUTINE	DrawEntity
+	; MetaSprite__xPos = int(dp->xPos) - screenXpos
+	; MetaSprite__yPos = int(dp->yPos) - screenYpos
+	;
+	; MetaSprite__ProcessMetaSprite_Y(dp->metaSpriteFrame, dp->metaSpriteCharAttr)
+
+	LDA	z:EntityStruct::xPos + 1
+	SUB	screenXpos
+	STA	MetaSprite__xPos
+
+	LDA	z:EntityStruct::yPos + 1
+	SUB	screenYpos
+	STA	MetaSprite__yPos
+
+	; ::TODO check if outside screen region::
+
+	; ::SHOULD replace with macro (xPos, yPos, frame, charattr are paraeters::
+	; ::SHOULDDO use DB = MetaSpriteLayoutBank, saves (n_entities + 4*obj - 7) cycles::
+	; ::: Will require MetaSpriteLayoutBank & $7F <= $3F::
+	LDX	z:EntityStruct::metaSpriteFrame
+	LDY	z:EntityStruct::metaSpriteCharAttr
+
+	SEP	#$20
+	JSR	MetaSprite__ProcessMetaSprite_Y
+	REP	#$30
+
+	RTS
+
 
 
 .A8
@@ -111,26 +147,10 @@ ROUTINE SetupScreen
 	STZ	BG1HOFS
 	STZ	BG1HOFS
 
-	Screen_SetVramBaseAndSize GAMELOOP
-	TransferToVramLocation	BlackSpriteTile, GAMELOOP_OAM_TILES
+	Screen_SetVramBaseAndSize	GAMELOOP
 
-	; ::DEBUG 3 seperate palettes to show the sprites::
-	LDA	#$8F + 0*16
-	STA	CGADD
-	LDA	#$25
-	STA	CGDATA
-	STA	CGDATA
-	LDA	#$8F + 1*16
-	STA	CGADD
-	LDA	#$18
-	STA	CGDATA
-	STA	CGDATA
-	LDA	#$8F + 2*16
-	STA	CGADD
-	LDA	#$34
-	STA	CGDATA
-	STA	CGDATA
-
+	TransferToVramLocation	ObjectTiles,	GAMELOOP_OAM_TILES
+	TransferToCgramLocation	ObjectPalette,	128
 
 	LDA	#TM_OBJ
 	STA	TM
@@ -139,12 +159,19 @@ ROUTINE SetupScreen
 
 
 .rodata
-LABEL BlackSpriteTile
-	.repeat 32
-		.byte $FF
-	.endrepeat
 
-BlackSpriteTile_End:
+.segment "BANK2"
+ObjectTiles:
+	.incbin	"resources/ship.4bpp"
+	.incbin	"resources/asteroids.4bpp"
+	.incbin	"resources/missile.4bpp"
+ObjectTiles_End:
+
+ObjectPalette:
+	.incbin	"resources/ship.clr"
+	.incbin	"resources/asteroids.clr"
+	.incbin	"resources/missile.clr"
+ObjectPalette_End:
 
 ENDMODULE
 
