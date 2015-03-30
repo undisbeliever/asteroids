@@ -43,7 +43,7 @@ ROUTINE Init
 	JSR	Entity__CreateProjectile
 
 	; ::DEBUG create many NPCs::
-	LDA	#10 - 1
+	LDA	#10 - 1 
 	STA	tmp
 
 	REPEAT

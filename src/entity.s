@@ -28,6 +28,8 @@ MODULE Entity
 	WORD	tmp
 .code
 
+.assert .sizeof(EntityStruct) <= NPC_ENTITY_MALLOC, error, "NPC_ENTITY_MALLOC too small"
+.assert .sizeof(EntityStruct) <= PROJECTILE_ENTITY_MALLOC, error, "PROJECTILE_ENTITY_MALLOC too small"
 
 
 

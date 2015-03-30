@@ -41,12 +41,5 @@ LABEL MetaSpriteFrameTable_Missile
 	.endrepeat
 
 
-; EntitySize data
-LABEL Missile_Size
-	.word	MISSILE_SIZE
-	.word	MISSILE_SIZE
-	.byte	(MISSILE_SIZE + 8) / 8
-	.byte	(MISSILE_SIZE + 8) / 8
-
 ; vim: ft=asm:
 

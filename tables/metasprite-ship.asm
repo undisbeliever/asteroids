@@ -46,12 +46,5 @@ LABEL MetaSpriteFrameTable_ShipThrust
 		.addr .ident(.sprintf("MetaSprite_ShipThrust_%d", i))
 	.endrepeat
 
-; EntitySize data
-LABEL Ship_Size
-	.word	SHIP_SIZE
-	.word	SHIP_SIZE
-	.byte	SHIP_SIZE / 8
-	.byte	SHIP_SIZE / 8
-
 ; vim: ft=asm:
 

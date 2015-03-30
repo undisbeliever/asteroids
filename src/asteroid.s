@@ -77,7 +77,8 @@ LABEL InitData
 	.word	.loword(256)			; xVecl
 	.word	.loword(0)			; yVecl
 
-	.addr	SmallAsteroid_Size		; sizePtr
+	.word	SMALL_SIZE			; width
+	.word	SMALL_SIZE			; height
 
 	.addr	MetaSprite_SmallAsteroid_2	; metaSpriteFrame
 	.word	0				; charAttr

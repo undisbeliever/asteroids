@@ -57,7 +57,8 @@ LABEL InitData
 	.word	0				; xVecl
 	.word	0				; yVecl
 
-	.addr	Ship_Size			; sizePtr
+	.word	SHIP_SIZE			; width
+	.word	SHIP_SIZE			; height
 
 	.addr	MetaSprite_Ship_0		; metaSpriteFrame
 	.word	0				; charAttr

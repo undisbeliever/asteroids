@@ -85,24 +85,6 @@ N_LARGE_ASTEROIDS = 4
 N_MEDIUM_ASTEROIDS = 12
 N_SMALL_ASTEROIDS = 16
 
-; EntitySize data
-LABEL LargeAsteroid_Size
-	.word	LARGE_SIZE
-	.word	LARGE_SIZE
-	.byte	(LARGE_SIZE + 8 ) / 8
-	.byte	(LARGE_SIZE + 8 ) / 8
-
-LABEL MediumAsteroid_Size
-	.word	MEDIUM_SIZE
-	.word	MEDIUM_SIZE
-	.byte	(MEDIUM_SIZE + 8 ) / 8
-	.byte	(MEDIUM_SIZE + 8 ) / 8
-
-LABEL SmallAsteroid_Size
-	.word	SMALL_SIZE
-	.word	SMALL_SIZE
-	.byte	(SMALL_SIZE + 8 ) / 8
-	.byte	(SMALL_SIZE + 8 ) / 8
 
 ; vim: ft=asm:
 

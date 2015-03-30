@@ -66,7 +66,8 @@ LABEL InitData
 	.word	.loword(100)			; xVecl
 	.word	.loword(-100)			; yVecl
 
-	.addr	Missile_Size			; sizePtr
+	.word	MISSILE_SIZE			; width
+	.word	MISSILE_SIZE			; height
 
 	.addr	MetaSprite_Missile_8		; metaSpriteFrame
 	.word	0				; charAttr

@@ -56,7 +56,7 @@ N_ACTIVE_NPCS = 100
 
 ;; Number of bytes allocated per player projectile.
 ;; ::TODO move into config.h::
-PROJECTILE_ENTITY_MALLOC = 20
+PROJECTILE_ENTITY_MALLOC = 30
 
 ;; Number of player projectiles
 ;; ::TODO move into config.h::
@@ -148,18 +148,6 @@ N_PROJECTILES = 4
 	CollisionPlayer		.addr
 .endstruct
 
-;; A struct that holds the size data of the entity
-;;
-;; Both variables are 16 bit as the calculations are done in 16 bit mode for
-;; speed purposes.
-.struct EntitySizeStruct
-	width			.word
-	height			.word
-
-	tileWidth		.byte
-	tileHeight		.byte
-.endstruct
-
 .global EntitySizeStructBank:zp
 .global InitNpcBank:zp
 .global InitProjectileBank:zp
@@ -188,8 +176,10 @@ N_PROJECTILES = 4
 	;; xVecl - 1:7:8 signed fixed point
 	yVecl			.res 2
 
-	;; pointer to EntitySizeStruct located within EntitySizeStructBank
-	sizePtr			.addr
+	;; Width of the entity
+	width			.word
+	;; Height of the entity
+	height			.word
 
 	;; pointer to the MetaSpriteData within `MetaSpriteLayoutBank`
 	metaSpriteFrame		.addr
@@ -490,17 +480,17 @@ EnterLoop:
 
 
 		; 	if npc->xPos < player.xPos
-		;		if npc->x + npc->size->width < player.xPos
+		;		if npc->x + npc->width < player.xPos
 		;			goto NoCollision
 		; 	else
-		;		if player.xPos + player.size->width < npc->xPos
+		;		if player.xPos + player.width < npc->xPos
 		;			goto NoCollision
 		;
 		; 	if npc->y < player.y
-		;		if npc->yPos + npc->size->height < player.yPos
+		;		if npc->yPos + npc->height < player.yPos
 		;			goto NoCollision
 		; 	else
-		;		if player.yPos + player.size->height < npc->yPos
+		;		if player.yPos + player.height < npc->yPos
 		;			goto NoCollision
 		;
 		; 	CollisionRoutine(npc)
@@ -520,15 +510,13 @@ EnterLoop:
 		CMP	a:player + EntityStruct::xPos + 1
 		IF_LT
 			; carry clear, A = npc->x
-			LDX	z:EntityStruct::sizePtr
-			ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::width, X
+			ADC	z:EntityStruct::width
 			CMP	a:player + EntityStruct::xPos + 1
 			BLT	NoCollision
 		ELSE
-			LDX	a:player + EntityStruct::sizePtr
 			LDA	a:player + EntityStruct::xPos + 1
 			CLC
-			ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::width, X
+			ADC	a:player + EntityStruct::width
 			CMP	z:EntityStruct::xPos + 1
 			BLT	NoCollision
 		ENDIF
@@ -536,16 +524,13 @@ EnterLoop:
 		LDA	z:EntityStruct::yPos + 1
 		CMP	player + EntityStruct::yPos + 1
 		IF_LT
-			LDX	z:EntityStruct::sizePtr
-			; carry clear, A = npc->y
-			ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::height, X
+			ADC	z:EntityStruct::height
 			CMP	a:player + EntityStruct::yPos + 1
 			BLT	NoCollision
 		ELSE
-			LDX	a:player + EntityStruct::sizePtr
 			LDA	a:player + EntityStruct::xPos + 1
 			CLC
-			ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::height, X
+			ADC	a:player + EntityStruct::height
 			CMP	z:EntityStruct::yPos + 1
 			BLT	NoCollision
 		ENDIF
@@ -575,17 +560,17 @@ EnterLoop:
 		; for y = firstActiveProjectile; y != NULL; y = projectiles[y]->nextEntity
 		;	if projectiles[y]->functionsTable
 		;		if npc->xPos < projectile[y]->xPos
-		;			if npc->x + npc->size->width < projectile[y]->xPos
+		;			if npc->x + npc->width < projectile[y]->xPos
 		;				continue
 		; 		else
-		;			if projectile[y]->xPos + projectile[y]->size->width < npc->xPos
+		;			if projectile[y]->xPos + projectile[y]->width < npc->xPos
 		;				continue
 		;
 		;		if npc->y < projectile[y]->y
-		;			if npc->yPos + npc->size->height < projectile[y]->yPos
+		;			if npc->yPos + npc->height < projectile[y]->yPos
 		;				continue
 		;		else
-		;			if projectile[y]->yPos + projectile[y]->size->height < npc->yPos
+		;			if projectile[y]->yPos + projectile[y]->height < npc->yPos
 		;			continue
 		;
 		;		projectile[y]->functionsTable->CollisionNpc(npc, y)
@@ -606,15 +591,13 @@ EnterLoop:
 					CMP	a:EntityStruct::xPos + 1, Y
 					IF_LT
 						; carry clear, A = entity->xPos
-						LDX	entityOffset + EntityStruct::sizePtr
-						ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::width, X
+						ADC	entityOffset + EntityStruct::width
 						CMP	a:EntityStruct::xPos + 1, Y
 						BLT	ContinueProjectileLoop
 					ELSE
-						LDX	a:EntityStruct::sizePtr, Y
 						LDA	a:EntityStruct::xPos + 1, Y
 						CLC
-						ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::width, X
+						ADC	a:EntityStruct::width, Y
 						CMP	entityOffset + EntityStruct::xPos + 1
 						BLT	ContinueProjectileLoop
 					ENDIF
@@ -623,15 +606,13 @@ EnterLoop:
 					CMP	a:EntityStruct::yPos + 1, Y
 					IF_LT
 						; carry clear, A = entity->yPos
-						LDX	entityOffset + EntityStruct::sizePtr
-						ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::height, X
+						ADC	entityOffset + EntityStruct::height
 						CMP	a:EntityStruct::yPos + 1, Y
 						BLT	ContinueProjectileLoop
 					ELSE
-						LDX	a:EntityStruct::sizePtr, Y
 						LDA	a:EntityStruct::yPos + 1, Y
 						CLC
-						ADC	f:EntitySizeStructBank << 16 + EntitySizeStruct::height, X
+						ADC	a:EntityStruct::height, Y
 						CMP	entityOffset + EntityStruct::yPos + 1
 						BLT	ContinueProjectileLoop
 					ENDIF
