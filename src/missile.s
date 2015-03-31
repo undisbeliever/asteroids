@@ -52,9 +52,6 @@ ROUTINE CollisionPlayer
 
 .segment "BANK1"
 
-InitProjectileBank 	= .bankbyte(*)		; ::DEBUG::
-
-
 ;; Missile initial data
 LABEL InitData
 	.addr	0				; nextEntity - keep blank.
@@ -72,8 +69,9 @@ LABEL InitData
 	.addr	MetaSprite_Missile_8		; metaSpriteFrame
 	.word	0				; charAttr
 
-.include "tables/metasprite-missile.asm"
 
+
+	.include "tables/metasprite-missile.asm"
 
 ENDMODULE
 

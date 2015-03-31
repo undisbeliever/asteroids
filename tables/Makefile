@@ -1,5 +1,5 @@
 
-TABLES = 
+TABLES = sine.inc 
 
 .PHONY: ALL
 

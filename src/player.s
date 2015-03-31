@@ -4,9 +4,20 @@
 .include "includes/structure.inc"
 .include "includes/registers.inc"
 .include "routines/block.h"
+.include "routines/math.h"
 
 .include "entity.h"
 .include "physics.h"
+.include "tables.h"
+.include "controler.h"
+
+;; Maximum velocity before "relativity" sets in
+;; 1:7:8 fractional
+MAX_VELOCITY = $0200		; 2.0
+
+;; Relativity factor.
+;; 1:7:8 fractional
+MAX_VELOCITY_RELATIVITY = $00F3	; 0.95
 
 MODULE Player
 
@@ -17,7 +28,15 @@ LABEL	EntityFunctionsTable
 
 
 .segment "SHADOW"
+PlayerData:
 	STRUCT	entity, EntityStruct
+
+	UINT16	score
+	ADDR	rotationIndex
+
+PlayerData_End:
+
+	WORD	tmp
 
 .code
 
@@ -35,9 +54,118 @@ ROUTINE	Init
 	RTS
 
 
+; dp = Entity
 .A16
 .I16
 ROUTINE Process
+	; if Controler__current & CONTROLS_ROTATE_CW
+	;	rotationIndex = (rotationIndex + 2) % 128
+	; else if Controler__current & CONTROLS_ROTATE_CC
+	;	rotationIndex = (rotationIndex + 2) % 128
+	;
+	; if Controler__current & CONTROLS_THRUST
+	;	entity->xVecl += Sine[rotationIndex]
+	;	entity->yVecl += Sine[(rotationIndex - 90deg) % 128]
+	;
+	;	entity->metasprite = MetaSpriteFrameTable_ShipThrust[rotationIndex]
+	; else
+	;	entity->metasprite = MetaSpriteFrameTable_Ship[rotationIndex]
+	;
+	; 
+	; if entity->xVecl * entity->xVecl + entity->yVecl * entity->yVecl >= MAX_VELOCITY * 2
+	;	entity->xVecl *= MAX_VELOCITY_RELATIVITY
+	;	entity->yVecl *= MAX_VELOCITY_RELATIVITY
+
+	.assert N_SHIP_FRAMES = 64, error, "Invalid N_ROTATIONS"
+
+	LDA	Controler__current
+	IF_BIT	#CONTROLS_ROTATE_CW
+		LDA	rotationIndex
+		INC
+		INC
+		AND	#$007F		; modulus 128
+		STA	rotationIndex
+	ELSE_BIT #CONTROLS_ROTATE_CC
+		LDA	rotationIndex
+		DEC
+		DEC
+		AND	#$007F		; modulus 128
+		STA	rotationIndex
+	ENDIF
+
+	LDA	Controler__current
+	IF_BIT	#CONTROLS_THRUST
+		LDX	rotationIndex
+
+		LDA	z:EntityStruct::xVecl
+		ADD	f:Tables__Sine_Thrust, X
+		STA	z:EntityStruct::xVecl
+
+		TXA
+		ADD	#16 * 2		; 90 degrees
+		AND	#$007E		; modulus 128
+		TAX
+
+		LDA	z:EntityStruct::yVecl
+		SUB	f:Tables__Sine_Thrust, X
+		STA	z:EntityStruct::yVecl
+
+		LDX	rotationIndex
+		LDA	f:MetaSpriteFrameTable_ShipThrust, X
+		STA	z:EntityStruct::metaSpriteFrame
+	ELSE
+		LDX	rotationIndex
+		LDA	f:MetaSpriteFrameTable_Ship, X
+		STA	z:EntityStruct::metaSpriteFrame
+	ENDIF
+
+	; Limit Velocity
+	; ::SHOULDDO modify math module to use DP to access MUL/DIV registers::
+	; ::SHOULDDO add fractional integer functions to math module::
+	PHB
+	PHK
+	PLB
+
+	SEP	#$20
+.A8
+
+	LDX	z:EntityStruct::xVecl
+	TXY
+	JSR	Math__Multiply_S16Y_S16X_S32XY
+	LDY	Math__product32 + 1
+	STY	tmp
+
+	LDX	z:EntityStruct::yVecl
+	TXY
+	JSR	Math__Multiply_S16Y_S16X_S32XY
+
+	REP	#$20
+.A16
+
+	LDA	Math__product32 + 1
+	ADD	tmp
+	CMP	#MAX_VELOCITY * MAX_VELOCITY / 256
+	IF_GE
+		SEP	#$20
+.A8
+
+		LDY	z:EntityStruct::xVecl
+		LDX	#MAX_VELOCITY_RELATIVITY
+		JSR	Math__Multiply_S16Y_S16X_S32XY
+		LDY	Math__product32 + 1
+		STY	z:EntityStruct::xVecl
+
+		LDY	z:EntityStruct::yVecl
+		LDX	#MAX_VELOCITY_RELATIVITY
+		JSR	Math__Multiply_S16Y_S16X_S32XY
+		LDY	Math__product32 + 1
+		STY	z:EntityStruct::yVecl
+
+		REP	#$20
+.A16
+	ENDIF
+	PLB	
+
 	RTS
 
 
@@ -63,11 +191,16 @@ LABEL InitData
 	.addr	MetaSprite_Ship_0		; metaSpriteFrame
 	.word	0				; charAttr
 
+	;; Extra Variables
+	.word	0				; score
+	.addr	0				; rotationIndex
+
 InitData_End:
 
-.include "tables/metasprite-ship.asm"
+.assert (InitData_End - InitData) = (PlayerData_End - PlayerData), error, "Invalid InitData size"
 
 
 
+	.include "tables/metasprite-ship.asm"
 ENDMODULE
 

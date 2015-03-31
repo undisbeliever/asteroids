@@ -61,11 +61,6 @@ ROUTINE Finalize
 
 .segment "BANK1"
 
-EntitySizeStructBank	= .bankbyte(*)		; ::DEBUG::
-InitNpcBank 		= .bankbyte(*)		; ::DEBUG::
-MetaSpriteLayoutBank	= .bankbyte(*)		; ::DEBUG::
-
-
 ;; Asteroid initial data
 LABEL InitData
 	.addr	0				; nextEntity - keep blank.
@@ -83,7 +78,9 @@ LABEL InitData
 	.addr	MetaSprite_SmallAsteroid_2	; metaSpriteFrame
 	.word	0				; charAttr
 
-.include "tables/metasprite-asteroid.asm"
+
+
+	.include "tables/metasprite-asteroid.asm"
 
 ENDMODULE
 

@@ -7,6 +7,8 @@
 .include "routines/random.h"
 .include "routines/metasprite.h"
 
+.include "controler.h"
+
 ;; Blank Handlers
 ROUTINE IrqHandler
 	RTI
@@ -33,6 +35,7 @@ ROUTINE VBlank
 	MetaSprite_VBlank
 
 	JSR	Random__AddJoypadEntropy
+	JSR	Controler__Update
 
 	; Load State
 	REP	#$30

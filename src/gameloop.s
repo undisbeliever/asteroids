@@ -36,12 +36,6 @@ ROUTINE Init
 .I16
 	JSR	Player__Init
 
-	; ::DEBUG projectile to test collisions::
-	LDX	#(256 - 8) / 2
-	LDY	#(224 - 8) / 2
-	LDA	#.loword(Missile__InitData)
-	JSR	Entity__CreateProjectile
-
 	; ::DEBUG create many NPCs::
 	LDA	#10 - 1 
 	STA	tmp
