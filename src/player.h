@@ -9,6 +9,8 @@
 
 IMPORT_MODULE Player
 	STRUCT	entity, EntityStruct
+	UINT16	score
+	ADDR	rotationIndex
 
 	;; Initializes the player
 	;; REQUIRE: DB access shadow RAM

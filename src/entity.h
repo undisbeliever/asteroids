@@ -12,7 +12,6 @@
 ;;	* Projectiles
 ;;
 ;; For speed purposes the system will only check for collisions between:
-;;	* The Player and Projectiles
 ;;	* The Player and NPCs
 ;;	* The NPCs and Projectiles.
 ;;
@@ -60,7 +59,7 @@ PROJECTILE_ENTITY_MALLOC = 30
 
 ;; Number of player projectiles
 ;; ::TODO move into config.h::
-N_PROJECTILES = 4
+N_PROJECTILES = 3
 
 ;; A table of functions used to handle behaviour of the player.
 .struct PlayerEntityFunctionsTable
@@ -140,12 +139,6 @@ N_PROJECTILES = 4
 	;;	dp: Npc address
 	;; 	Y: Projectile address
 	CollisionNpc		.addr
-
-	;; Called when the npc collides with the player
-	;; REQUIRES: 16 bit A, 16 bit Index
-	;; INPUT:
-	;; 	dp: Projectile address
-	CollisionPlayer		.addr
 .endstruct
 
 .global EntitySizeStructBank:zp
@@ -314,8 +307,6 @@ IMPORT_MODULE Entity
 					LDX	z:EntityStruct::functionsTable
 					IF_NOT_ZERO
 						JSR	(ProjectileEntityFunctionsTable::Physics, X)
-
-						Entity__CheckEntityPlayerCollision player, ProjectileEntityFunctionsTable::CollisionPlayer
 					ENDIF
 
 				ENDIF

@@ -7,13 +7,16 @@
 .include "routines/math.h"
 
 .include "entity.h"
+.include "missile.h"
 .include "physics.h"
 .include "tables.h"
 .include "controler.h"
 
+RATE_OF_FIRE = 5
+
 ;; Maximum velocity before "relativity" sets in
 ;; 1:7:8 fractional
-MAX_VELOCITY = $0200		; 2.0
+MAX_VELOCITY = $01C0		; 1.75
 
 ;; Relativity factor.
 ;; 1:7:8 fractional
@@ -31,6 +34,7 @@ LABEL	EntityFunctionsTable
 PlayerData:
 	STRUCT	entity, EntityStruct
 
+	UINT16	missileTimeout
 	UINT16	score
 	ADDR	rotationIndex
 
@@ -75,6 +79,17 @@ ROUTINE Process
 	; if entity->xVecl * entity->xVecl + entity->yVecl * entity->yVecl >= MAX_VELOCITY * 2
 	;	entity->xVecl *= MAX_VELOCITY_RELATIVITY
 	;	entity->yVecl *= MAX_VELOCITY_RELATIVITY
+	;
+	; if missileTimout == 0
+	; 	missileTimeout = RATE_OF_FIRE
+	;	if Controler__current & CONTROLS_FIRE
+	;		Entity__CreateProjectile(
+	;			Missile
+	;			entity->xPos + SHIP_SIZE / 2,
+	;			entity->yPos + SHIP_SIZE / 2
+	;		)
+	; else
+	;	missileTimeout--
 
 	.assert N_SHIP_FRAMES = 64, error, "Invalid N_ROTATIONS"
 
@@ -164,7 +179,32 @@ ROUTINE Process
 		REP	#$20
 .A16
 	ENDIF
-	PLB	
+
+	PLB
+
+	LDA	missileTimeout
+	IF_ZERO
+		LDA	Controler__current
+		IF_BIT	#CONTROLS_FIRE
+			LDA	#RATE_OF_FIRE
+			STA	missileTimeout
+
+			PHD
+
+			LDA	z:EntityStruct::xPos + 1
+			ADD	#SHIP_SIZE / 2
+			TAX
+			LDA	z:EntityStruct::yPos + 1
+			ADD	#SHIP_SIZE / 2
+			TAY
+			LDA	#.loword(Missile__InitData)
+			JSR	Entity__CreateProjectile
+
+			PLD
+		ENDIF
+	ELSE
+		DEC	missileTimeout
+	ENDIF
 
 	RTS
 
@@ -192,6 +232,7 @@ LABEL InitData
 	.word	0				; charAttr
 
 	;; Extra Variables
+	.word	0				; missileTimeout
 	.word	0				; score
 	.addr	0				; rotationIndex
 

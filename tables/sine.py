@@ -6,7 +6,7 @@ import math
 
 N_ROTATIONS = 64
 THRUST = 0.08
-MISSILE = 0.9
+MISSILE = 2.0
 
 def f_to_hex(f):
     i = int(f * 0x100)
@@ -43,7 +43,7 @@ def main():
     print()
 
     draw_sine_table("Thrust", THRUST)
-    draw_sine_table("Missile", THRUST)
+    draw_sine_table("Missile", MISSILE)
 
 if __name__ == '__main__':
     main()
