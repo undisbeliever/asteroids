@@ -74,15 +74,6 @@ ROUTINE Process
 .A16
 .I16
 ROUTINE CollisionNpc
-	; ::DEBUG collision test - set NPC palette to 2::
-	LDA	#1 << OAM_CHARATTR_PALETTE_SHIFT
-	STA	z:EntityStruct::metaSpriteCharAttr
-
-	RTS
-
-.A16
-.I16
-ROUTINE CollisionPlayer
 	RTS
 
 

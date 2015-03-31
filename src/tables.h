@@ -8,6 +8,8 @@
 
 IMPORT_MODULE Tables
 
+	CONST	SINE_COUNT, 64
+
 	LABEL	Sine_Thrust
 	LABEL	Sine_Missile
 

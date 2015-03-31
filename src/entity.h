@@ -4,7 +4,7 @@
 ;;	* Dynamic memory allocation
 ;;	* collision detection
 ;;	* Physics Hook
-;;	* ::TODO out of scope detection::
+;;	* ::TODO out of screen detection::
 ;;
 ;; This module manages entities in 3 seperate lists:
 ;;	* Player
@@ -263,7 +263,6 @@ IMPORT_MODULE Entity
 		;		dp->functionsTable->Process(dp)
 		;		if dp->functionsTable
 		;			dp->functionsTable->Physics(dp)
-		;			Entity__CheckEntityPlayerCollision(dp, player, PlayerProjectileCollisionRoutine, ProjectileEntityFunctionsTable::CollisionPlayer)
 		;
 		; for dp in firstActiveNpc linked list
 		;	if dp->functionsTable == NULL
@@ -519,7 +518,7 @@ EnterLoop:
 			CMP	a:player + EntityStruct::yPos + 1
 			BLT	NoCollision
 		ELSE
-			LDA	a:player + EntityStruct::xPos + 1
+			LDA	a:player + EntityStruct::yPos + 1
 			CLC
 			ADC	a:player + EntityStruct::height
 			CMP	z:EntityStruct::yPos + 1

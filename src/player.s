@@ -192,7 +192,7 @@ ROUTINE Process
 			PHD
 
 			LDA	z:EntityStruct::xPos + 1
-			ADD	#SHIP_SIZE / 2
+			ADD	#SHIP_SIZE / 2 - 1
 			TAX
 			LDA	z:EntityStruct::yPos + 1
 			ADD	#SHIP_SIZE / 2

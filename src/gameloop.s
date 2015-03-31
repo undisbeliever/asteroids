@@ -36,28 +36,11 @@ ROUTINE Init
 .I16
 	JSR	Player__Init
 
-	; ::DEBUG create many NPCs::
-	LDA	#10 - 1 
-	STA	tmp
-
-	REPEAT
-		; ::DEBUG Check it doesn't crash::
-		; ::CREATE a simple asteroid::
-		LDA	tmp
-		ASL
-		ASL
-		ASL
-		ADD	tmp
-		ASL
-		ADC	#25
-		TAY
-
-		LDX	#0
-		LDA	#.loword(Asteroid__InitData)
-		JSR	Entity__CreateNpc
-
-		DEC	tmp
-	UNTIL_MINUS
+	; ::DEBUG create some asteroids::
+	LDX	#30
+	LDY	#60
+	LDA	#.loword(Asteroid__InitData)
+	JSR	Entity__CreateNpc
 
 
 	SEP	#$20

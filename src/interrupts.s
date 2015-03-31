@@ -25,6 +25,9 @@ ROUTINE VBlank
 	PHX
 	PHY
 
+	PHK
+	PLB
+
 	SEP #$20
 .A8
 .I16
@@ -34,8 +37,8 @@ ROUTINE VBlank
 	Screen_VBlank
 	MetaSprite_VBlank
 
-	JSR	Random__AddJoypadEntropy
 	JSR	Controler__Update
+	JSR	Random__AddJoypadEntropy
 
 	; Load State
 	REP	#$30
