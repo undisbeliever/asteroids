@@ -6,6 +6,7 @@
 .include "routines/screen.h"
 .include "routines/random.h"
 .include "routines/metasprite.h"
+.include "routines/text.h"
 
 .include "controler.h"
 
@@ -36,6 +37,7 @@ ROUTINE VBlank
 
 	Screen_VBlank
 	MetaSprite_VBlank
+	Text_VBlank
 
 	JSR	Controler__Update
 	JSR	Random__AddJoypadEntropy

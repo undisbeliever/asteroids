@@ -6,6 +6,7 @@
 .include "routines/random.h"
 .include "routines/metasprite.h"
 
+.include "gameloop.h"
 .include "entity.h"
 .include "physics.h"
 .include "player.h"
@@ -142,7 +143,7 @@ ROUTINE CollisionProjectile
 	LDA	#0
 	STA	a:EntityStruct::functionsTable, Y
 
-	; ::TODO increase score::
+	INC	GameLoop__score
 
 DestroyAsteroidWithShip:
 

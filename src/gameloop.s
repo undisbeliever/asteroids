@@ -6,6 +6,9 @@
 .include "routines/block.h"
 .include "routines/screen.h"
 .include "routines/metasprite.h"
+.include "routines/text.h"
+.include "routines/text8x8.h"
+
 .include "entity.h"
 .include "player.h"
 .include "asteroid.h"
@@ -15,8 +18,7 @@ MODULE GameLoop
 
 
 .segment "SHADOW"
-	UINT16	screenXpos
-	UINT16	screenYpos
+	UINT16	score
 
 	UINT16	tmp
 .code
@@ -24,10 +26,17 @@ MODULE GameLoop
 .A8
 .I16
 ROUTINE Init
+	STZ	score
+
 	JSR	SetupScreen
 	JSR	Entity__Init
 
 	MetaSprite_Init
+
+	Text_LoadFont FontTiles, GAMELOOP_BG3_TILES, GAMELOOP_BG3_MAP
+	Text_SetInterface Text8x8__SingleSpacingInterface, 0
+	Text_SetupWindow 2, 2, 7, 3, Text__WINDOW_NO_BORDER
+	Text_SetStringBasic
 
 	REP	#$20
 .A16
@@ -56,8 +65,15 @@ LABEL GameLoop
 		Entity__Process Player__entity
 		Entity__Render Player__entity, DrawEntity
 
+		; Reset DP
+		LDA	#0
+		TCD
+
 		SEP	#$20
 .A8
+		Text_SetCursor 0, 0
+		Text_PrintDecimal score, 4
+
 		JSR	MetaSprite__FinalizeLoop
 	FOREVER
 
@@ -71,17 +87,12 @@ LABEL GameLoop
 .A16
 .I16
 ROUTINE	DrawEntity
-	; MetaSprite__xPos = int(dp->xPos) - screenXpos
-	; MetaSprite__yPos = int(dp->yPos) - screenYpos
-	;
 	; MetaSprite__ProcessMetaSprite_Y(dp->metaSpriteFrame, dp->metaSpriteCharAttr)
 
 	LDA	z:EntityStruct::xPos + 1
-	SUB	screenXpos
 	STA	MetaSprite__xPos
 
 	LDA	z:EntityStruct::yPos + 1
-	SUB	screenYpos
 	STA	MetaSprite__yPos
 
 	; ::TODO check if outside screen region::
@@ -114,11 +125,16 @@ ROUTINE SetupScreen
 
 	Screen_SetVramBaseAndSize	GAMELOOP
 
+	TransferToVramLocation	FontTiles,	GAMELOOP_BG3_TILES
+	TransferToCgramLocation	FontPalette,	2 * 8 * 4
+
 	TransferToVramLocation	ObjectTiles,	GAMELOOP_OAM_TILES
 	TransferToCgramLocation	ObjectPalette,	128
 
-	LDA	#TM_OBJ
+	LDA	#TM_BG3 | TM_OBJ
 	STA	TM
+
+	
 
 	RTS
 
@@ -137,6 +153,14 @@ ObjectPalette:
 	.incbin	"resources/asteroids.clr"
 	.incbin	"resources/missile.clr"
 ObjectPalette_End:
+
+FontTiles:
+	.incbin	"snesdev-common/resources/font8x8-bold-transparent.2bpp"
+FontTiles_End:
+
+FontPalette:
+	.word	$0000, $7FFF, $6b3a, $4e73
+FontPalette_End:
 
 ENDMODULE
 

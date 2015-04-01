@@ -35,7 +35,6 @@ PlayerData:
 	STRUCT	entity, EntityStruct
 
 	UINT16	missileTimeout
-	UINT16	score
 	ADDR	rotationIndex
 
 PlayerData_End:
@@ -226,7 +225,6 @@ LABEL InitData
 
 	;; Extra Variables
 	.word	0				; missileTimeout
-	.word	0				; score
 	.addr	0				; rotationIndex
 
 InitData_End:
