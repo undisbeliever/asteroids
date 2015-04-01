@@ -29,6 +29,10 @@ LABEL	EntityFunctionsTable
 	.addr	.loword(Process)
 	.addr	.loword(Physics__ProcessEntity)
 
+LABEL	DummyEntityFunctionsTable
+	.addr	.loword(ProcessDummy)
+	.addr	.loword(ProcessDummy)
+
 
 .segment "SHADOW"
 PlayerData:
@@ -52,6 +56,18 @@ ROUTINE	Init
 .A8
 .I16
 	MemCopy	InitData, entity
+
+	PLP
+	RTS
+
+
+ROUTINE	InitDummy
+	PHP
+	REP	#$30
+	SEP	#$20
+.A8
+.I16
+	MemCopy	InitDummyData, entity
 
 	PLP
 	RTS
@@ -201,6 +217,10 @@ ROUTINE Process
 	RTS
 
 
+;; Does nothing, just returns
+ROUTINE ProcessDummy
+	RTS
+
 .segment "BANK1"
 
 
@@ -226,10 +246,36 @@ LABEL InitData
 	;; Extra Variables
 	.word	0				; missileTimeout
 	.addr	0				; rotationIndex
-
 InitData_End:
 
 .assert (InitData_End - InitData) = (PlayerData_End - PlayerData), error, "Invalid InitData size"
+
+
+;; Dummy Initial Data
+LABEL InitDummyData
+	.addr	0				; nextEntity - keep blank.
+	.addr	.loword(DummyEntityFunctionsTable)
+
+	.byte	$00
+	.word	512				; xPos
+	.byte	$00
+	.word	512				; yPos
+
+	.word	0				; xVecl
+	.word	0				; yVecl
+
+	.word	SHIP_SIZE			; width
+	.word	SHIP_SIZE			; height
+
+	.addr	MetaSprite_Ship_0		; metaSpriteFrame
+	.word	0				; charAttr
+
+	.word	0				; missileTimeout
+	.addr	0				; rotationIndex
+
+InitDummyData_End:
+
+.assert (InitDummyData_End - InitDummyData) = (PlayerData_End - PlayerData), error, "Invalid InitDummyData size"
 
 
 

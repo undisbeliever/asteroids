@@ -126,10 +126,10 @@ ROUTINE Process
 .A16
 .I16
 ROUTINE CollisionPlayer
-	; ::DEBUG notification::
-	REPEAT
-	FOREVER
+	; GameLoop__playerStillAlive = false
+	; DestroyAsteroidWithShip()
 
+	STZ	GameLoop__playerStillAlive
 	BRA	DestroyAsteroidWithShip
 
 

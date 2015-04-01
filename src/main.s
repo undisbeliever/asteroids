@@ -33,9 +33,11 @@ ROUTINE Main
 	LDA	#$0F
 	STA	INIDISP
 
-	JSR	GameLoop__PlayGame
+	REPEAT
+		JSR	GameLoop__AttractMode
 
-
+		JSR	GameLoop__PlayGame
+	FOREVER
 
 
 .segment "COPYRIGHT"

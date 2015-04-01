@@ -26,13 +26,20 @@ IMPORT_MODULE GameLoop
 	;; The player's current score
 	UINT16	score
 
+	;; Non-Zero when the player is still alive.
+	WORD	playerStillAlive
+
 	;; Initializes the system
 	;; REQUIRES: 8 bit A, 16 bit Index
 	ROUTINE Init
 
-	;; Processes the game loop
+	;; Processes the game
 	;; REQUIRES: 8 bit A, 16 bit Index
 	ROUTINE PlayGame
+
+	;; Moves all of the asteroids around, waits until start pressed
+	;; REQUIRES: 8 bit A, 16 bit Index
+	ROUTINE AttractMode
 
 ENDMODULE
 

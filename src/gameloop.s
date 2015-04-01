@@ -13,12 +13,14 @@
 .include "player.h"
 .include "asteroid.h"
 .include "missile.h"
+.include "controler.h"
 
 MODULE GameLoop
 
 
 .segment "SHADOW"
 	UINT16	score
+	WORD	playerStillAlive
 
 	UINT16	tmp
 .code
@@ -26,22 +28,33 @@ MODULE GameLoop
 .A8
 .I16
 ROUTINE Init
-	STZ	score
-
 	JSR	SetupScreen
-	JSR	Entity__Init
 
 	MetaSprite_Init
 
 	Text_LoadFont FontTiles, GAMELOOP_BG3_TILES, GAMELOOP_BG3_MAP
+
+	Text_SelectWindow 0
 	Text_SetInterface Text8x8__SingleSpacingInterface, 0
-	Text_SetupWindow 2, 2, 7, 3, Text__WINDOW_NO_BORDER
+	Text_SetupWindow 2, 2, 7, 2, Text__WINDOW_NO_BORDER
 	Text_SetStringBasic
 
+	Text_SelectWindow 1
+	Text_SetInterface Text8x8__SingleSpacingInterface, 0
+	Text_SetupWindow 10, 14, 22, 14, Text__WINDOW_NO_BORDER
+	Text_SetStringBasic
+
+	.assert * = SetupAsteroids, lderror, "Bad Flow"
+
+
+;; Sets up the game state
+.A8
+.I16
+ROUTINE SetupAsteroids
 	REP	#$20
 .A16
 .I16
-	JSR	Player__Init
+	JSR	Entity__Init
 	JSR	Asteroid__SpawnLargeAsteroid
 	JSR	Asteroid__SpawnLargeAsteroid
 
@@ -54,30 +67,69 @@ ROUTINE Init
 .A8
 .I16
 ROUTINE PlayGame
+	JSR	SetupAsteroids
+	JSR	Player__Init
+
+	Text_SelectWindow 0
+
+	STZ	score
+
+	LDA	#$FF
+	STA	playerStillAlive
+
 	REPEAT
 		JSR	Screen__WaitFrame
-		JSR	MetaSprite__InitLoop
+		JSR	Process
 
-LABEL GameLoop
-		REP	#$30
-.A16
-.I16
-		Entity__Process Player__entity
-		Entity__Render Player__entity, DrawEntity
-
-		; Reset DP
-		LDA	#0
-		TCD
-
-		SEP	#$20
-.A8
 		Text_SetCursor 0, 0
 		Text_PrintDecimal score, 4
 
-		JSR	MetaSprite__FinalizeLoop
-	FOREVER
+		LDA	playerStillAlive
+	UNTIL_ZERO
 
 	RTS
+
+
+.A8
+.I16
+ROUTINE AttractMode
+	JSR	Player__InitDummy
+
+	Text_SelectWindow 1
+	Text_PrintString "PRESS  START"
+
+	REPEAT
+		JSR	Screen__WaitFrame
+		JSR	Process
+
+		LDA	Controler__pressed + 1
+		AND	#JOYH_START
+	UNTIL_NOT_ZERO
+
+	JSR	Text__ClearWindow
+
+	RTS
+
+
+.A8
+.I16
+ROUTINE	Process 
+	JSR	MetaSprite__InitLoop
+
+LABEL GameLoop
+	REP	#$30
+.A16
+.I16
+	Entity__Process Player__entity
+	Entity__Render Player__entity, DrawEntity
+
+	; Reset DP
+	LDA	#0
+	TCD
+
+	SEP	#$20
+.A8
+	JMP	MetaSprite__FinalizeLoop
 
 
 
