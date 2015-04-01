@@ -134,7 +134,10 @@ ROUTINE Init
 
 		LDX	tmp
 		LDA	#size - 1
+
+		PHB
 		MVN	$7E, InitBank
+		PLB
 
 		PLA
 		STA	z:EntityStruct::xPos + 1

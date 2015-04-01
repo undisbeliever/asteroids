@@ -4,7 +4,6 @@
 ;;	* Dynamic memory allocation
 ;;	* collision detection
 ;;	* Physics Hook
-;;	* ::TODO out of screen detection::
 ;;
 ;; This module manages entities in 3 seperate lists:
 ;;	* Player
@@ -66,14 +65,14 @@ N_PROJECTILES = 3
 	;; Called once per frame, before physics
 	;; Should modify xVecl, yVecl, metaSpriteFrame
 	;; May set the Entity's `functionsTable` to NULL to delete the entity.
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Process			.addr
 
 	;; Called once per frame, after Process
 	;; Should modify xPos, yPos
 	;; MUST NOT set the Entity's `functionsTable` to NULL to delete the entity.
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Physics			.addr
 .endstruct
@@ -81,32 +80,32 @@ N_PROJECTILES = 3
 ;; A table of functions used to handle behaviour of the npcs.
 .struct NpcEntityFunctionsTable
 	;; Called when npc is created.
-	;; REQUIRES: 16 bit A, 16 bit Index, DB=$7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Init			.addr
 
 	;; Called once per frame, before physics
 	;; Should modify xVecl, yVecl, metaSpriteFrame
 	;; May set the Entity's `functionsTable` to NULL to delete the entity.
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Process			.addr
 
 	;; Called once per frame, after Process
 	;; Should modify xPos, yPos
 	;; MUST NOT set the Entity's `functionsTable` to NULL to delete the entity.
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Physics			.addr
 
 	;; Called when the player collides with the npc
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT:
 	;;	dp: EntityStruct NPC address
 	CollisionPlayer		.addr
 
 	;; Called when an npc collides with a projectile
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT:
 	;;	dp: EntityStruct address of npc
 	;;	y: EntityStruct projectile address
@@ -116,7 +115,7 @@ N_PROJECTILES = 3
 ;; A table of functions used to handle behaviour of the projectiles
 .struct ProjectileEntityFunctionsTable
 	;; Called when projectile is created.
-	;; REQUIRES: 16 bit A, 16 bit Index, DB=$7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Init			.addr
 
@@ -129,7 +128,7 @@ N_PROJECTILES = 3
 	;; Called once per frame, after Process
 	;; Should modify xPos, yPos
 	;; MUST NOT set the Entity's `functionsTable` to NULL to delete the entity.
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Physics			.addr
 
@@ -221,7 +220,6 @@ IMPORT_MODULE Entity
 	;;	X: xPosition
 	;;	Y: yPosition
 	;; OUTPUT:
-	;;	DB: $7E
 	;;	Y: the address of the allocated npc (NULL if not possible).
 	;;	z flag set if NPC could not be created
 	ROUTINE CreateNpc
@@ -241,14 +239,13 @@ IMPORT_MODULE Entity
 	;;	X: xPosition
 	;;	Y: yPosition
 	;; OUTPUT:
-	;;	DB: $7E
 	;;	Y: the address of the allocated npc (NULL if not possible).
 	;;	z flag set if NPC could not be created
 	ROUTINE CreateProjectile
 
 	;; Processes all of the NPCs and Projectiles.
 	;;
-	;; REQUIRES: 16 bit A, 16 bit Index, DB $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; PARAM:
 	;;	player - the memory location of the player's struct
 	.macro Entity__Process player
@@ -353,13 +350,13 @@ EnterLoop:
 	;; The entitis are cleared by this routine as it could be problematic to clear them
 	;; using the Process loop.
 	;;
-	;; REQUIRES: 16 bit A, 16 bit Index, DB=$7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;;
 	;; PARAM:
 	;;	player: the player's EntityStruct
 	;; 	DrawEntityRoutine:
 	;;		A routine that draws the entity on the screen
-	;;		STATE: 16 bit A, 16 bit Index, DB = $7E
+	;;		STATE: 16 bit A, 16 bit Index
 	;;		INPUT: dp = Entity
 	.macro Entity__Render player, DrawEntityRoutine
 		; dp = player
@@ -452,7 +449,7 @@ EnterLoop:
 	;;
 	;; This macro ignores the fractional part of xPos/yPos
 	;;
-	;; REQUIRES: 16 bit A, 16 bit Index, DB=$7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; PARAM:
 	;;	player: the address of the player's EntityStruct.
 	;;	EntityCollisionRoutine: the routine in the Entity's finction table to call if there is a collision
@@ -540,7 +537,7 @@ EnterLoop:
 	;;
 	;; This macro ignores the fractional part of xPos/yPos
 	;;
-	;; REQUIRES: 16 bit A, 16 bit Index, DB=$7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; PARAM:
 	;;	entityOffset: The offset of the entities EntityStruct data.
 	;;	CollisionRoutine: The collision routine to call in `ProjectileEntityFunctionsTable`

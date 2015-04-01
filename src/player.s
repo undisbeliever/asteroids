@@ -135,12 +135,7 @@ ROUTINE Process
 	ENDIF
 
 	; Limit Velocity
-	; ::SHOULDDO modify math module to use DP to access MUL/DIV registers::
 	; ::SHOULDDO add fractional integer functions to math module::
-	PHB
-	PHK
-	PLB
-
 	SEP	#$20
 .A8
 
@@ -179,8 +174,6 @@ ROUTINE Process
 		REP	#$20
 .A16
 	ENDIF
-
-	PLB
 
 	LDA	missileTimeout
 	IF_ZERO

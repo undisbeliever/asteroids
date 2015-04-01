@@ -55,11 +55,7 @@ ROUTINE	SpawnLargeAsteroid
 	; y = Rnd(224)
 	; Entity__CreateNpc(LargeAsteroid_InitData, x, y)
 
-	PHB
 	PHP
-
-	PHK
-	PLB
 
 	REP	#$30
 	SEP	#$20
@@ -90,7 +86,6 @@ ROUTINE	SpawnLargeAsteroid
 	JSR	Entity__CreateNpc
 
 	PLP
-	PLB
 	RTS
 
 
@@ -221,12 +216,6 @@ ROUTINE SetRandomFrameAndVelocity
 	; dp->xVecl = Rnd(tmp * 2) - tmp
 	; dp->yVecl = Rnd(tmp * 2) - tmp
 
-	PHB
-
-	; ::SHOULDDO modify math module to use DP to access MUL/DIV registers::
-	PHK
-	PLB
-
 	STA	tmp
 	STX	tmp2
 
@@ -271,7 +260,6 @@ ROUTINE SetRandomFrameAndVelocity
 	SUB	tmp
 	STA	z:EntityStruct::yVecl
 
-	PLB
 	RTS
 
 

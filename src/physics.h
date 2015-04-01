@@ -9,7 +9,7 @@
 
 IMPORT_MODULE Physics
 	;; Processes and Entities Physics
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = Entity
 	ROUTINE ProcessEntity
 ENDMODULE

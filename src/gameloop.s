@@ -24,8 +24,6 @@ MODULE GameLoop
 .A8
 .I16
 ROUTINE Init
-	PHB
-
 	JSR	SetupScreen
 	JSR	Entity__Init
 
@@ -38,10 +36,8 @@ ROUTINE Init
 	JSR	Asteroid__SpawnLargeAsteroid
 	JSR	Asteroid__SpawnLargeAsteroid
 
-
 	SEP	#$20
 .A8
-	PLB
 	RTS
 
 
@@ -54,17 +50,11 @@ ROUTINE PlayGame
 		JSR	MetaSprite__InitLoop
 
 LABEL GameLoop
-		PHB
-			LDA	#$7E
-			PHA
-			PLB
-
-			REP	#$30
+		REP	#$30
 .A16
 .I16
-			Entity__Process Player__entity
-			Entity__Render Player__entity, DrawEntity
-		PLB
+		Entity__Process Player__entity
+		Entity__Render Player__entity, DrawEntity
 
 		SEP	#$20
 .A8
