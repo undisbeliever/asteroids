@@ -8,7 +8,8 @@
 
 IMPORT_MODULE Asteroid
 
-	LABEL InitData
+	;; Spawn a randonly placed Large Asteroid.
+	ROUTINE	SpawnLargeAsteroid
 
 ENDMODULE
 

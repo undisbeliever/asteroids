@@ -35,12 +35,8 @@ ROUTINE Init
 .A16
 .I16
 	JSR	Player__Init
-
-	; ::DEBUG create some asteroids::
-	LDX	#30
-	LDY	#60
-	LDA	#.loword(Asteroid__InitData)
-	JSR	Entity__CreateNpc
+	JSR	Asteroid__SpawnLargeAsteroid
+	JSR	Asteroid__SpawnLargeAsteroid
 
 
 	SEP	#$20

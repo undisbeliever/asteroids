@@ -49,6 +49,51 @@ LABEL	SmallAsteroidFunctionsTable
 
 .code
 
+
+ROUTINE	SpawnLargeAsteroid
+	; x = (Rnd(128) + (256 - 128 / 2) - LARGE_SIZE / 2) % 256
+	; y = Rnd(224)
+	; Entity__CreateNpc(LargeAsteroid_InitData, x, y)
+
+	PHB
+	PHP
+
+	PHK
+	PLB
+
+	REP	#$30
+	SEP	#$20
+.A8
+.I16
+	JSR	Random__Rnd
+
+	LDXY	Random__Seed
+
+	REP	#$30
+.A16
+	LDA	Random__Seed + 2
+	AND	#$007F
+	ADD	#256 - 128 / 2 - LARGE_SIZE / 2
+	AND	#$00FF
+	PHA
+
+	SEP	#$20
+.A8
+	LDY	#224
+	JSR	Random__Rnd_U16Y
+
+	REP	#$30
+.A16
+	; Y from Random__Rnd_U16Y
+	PLX
+	LDA	#.loword(LargeAsteroid_InitData)
+	JSR	Entity__CreateNpc
+
+	PLP
+	PLB
+	RTS
+
+
 .A16
 .I16
 ROUTINE Init_Large
@@ -233,7 +278,6 @@ ROUTINE SetRandomFrameAndVelocity
 .segment "BANK1"
 
 ;; Asteroid initial data
-LABEL InitData
 LABEL LargeAsteroid_InitData
 	.addr	0				; nextEntity - keep blank.
 	.addr	.loword(LargeAsteroidFunctionsTable)

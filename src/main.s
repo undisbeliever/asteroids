@@ -8,6 +8,7 @@
 .include "includes/import_export.inc"
 .include "includes/registers.inc"
 .include "includes/structure.inc"
+.include "routines/random.h"
 .include "routines/screen.h"
 .include "gameloop.h"
 
@@ -23,6 +24,9 @@ ROUTINE Main
 
 	LDA	#NMITIMEN_VBLANK_FLAG | NMITIMEN_AUTOJOY_FLAG
 	STA	NMITIMEN
+
+	LDXY	#$C97B39A8		; source: random.org
+	STXY	Random__Seed
 
 	JSR	GameLoop__Init
 
