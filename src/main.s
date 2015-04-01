@@ -28,6 +28,9 @@ ROUTINE Main
 	LDXY	#$C97B39A8		; source: random.org
 	STXY	Random__Seed
 
+	LDA	#MEMSEL_FASTROM
+	STA	MEMSEL
+
 	JSR	GameLoop__Init
 
 	LDA	#$0F
