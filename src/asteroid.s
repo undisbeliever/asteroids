@@ -4,6 +4,7 @@
 .include "includes/structure.inc"
 .include "includes/registers.inc"
 .include "routines/random.h"
+.include "routines/metasprite.h"
 
 .include "entity.h"
 .include "physics.h"
@@ -44,28 +45,35 @@ LABEL	SmallAsteroidFunctionsTable
 .segment "SHADOW"
 	WORD	tmp
 	WORD	tmp2
+	WORD	_spawnSmallerAsteroidsAddr
 
 .code
 
 .A16
 .I16
 ROUTINE Init_Large
+	LDY	#N_LARGE_ASTEROIDS
+	LDX	#.loword(MetaSpriteFrameTable_LargeAsteroid)
 	LDA	#LARGE_MAX_VELOCITY
-	JMP	SetRandomVelocity
+	JMP	SetRandomFrameAndVelocity
 
 
 .A16
 .I16
 ROUTINE Init_Medium
+	LDY	#N_MEDIUM_ASTEROIDS
+	LDX	#.loword(MetaSpriteFrameTable_MediumAsteroid)
 	LDA	#MEDIUM_MAX_VELOCITY
-	JMP	SetRandomVelocity
+	JMP	SetRandomFrameAndVelocity
 
 
 .A16
 .I16
 ROUTINE Init_Small
+	LDY	#N_SMALL_ASTEROIDS
+	LDX	#.loword(MetaSpriteFrameTable_SmallAsteroid)
 	LDA	#SMALL_MAX_VELOCITY
-	JMP	SetRandomVelocity
+	JMP	SetRandomFrameAndVelocity
 
 
 .A16
@@ -140,13 +148,13 @@ DestroyAsteroidWithShip:
 .A16
 .I16
 ROUTINE SpawnSmallerAsteroids
-	STA	tmp2
+	STA	_spawnSmallerAsteroidsAddr
 
 	.repeat 3
 		PHD
 			LDX	z:EntityStruct::xPos + 1
 			LDY	z:EntityStruct::yPos + 1
-			LDA	tmp2
+			LDA	_spawnSmallerAsteroidsAddr
 			JSR	Entity__CreateNpc
 		PLD
 	.endrepeat
@@ -154,16 +162,42 @@ ROUTINE SpawnSmallerAsteroids
 	RTS
 
 
+;; IN:
+;;	A - max velocity per dimension
+;;	X - MetaSpriteFrameTable
+;;	Y - Number of MetaSprite Frames
+;;	dp - Asteroid EntityStruct
 .A16
 .I16
-ROUTINE SetRandomVelocity
-	STA	tmp
+ROUTINE SetRandomFrameAndVelocity
+	; tmp = A
+	; Y = Rnd(Y) * 2
+	; dp->metaSpriteFrame = MetaSpriteLayoutBank[y + x]
+	; dp->xVecl = Rnd(tmp * 2) - tmp
+	; dp->yVecl = Rnd(tmp * 2) - tmp
 
 	PHB
 
 	; ::SHOULDDO modify math module to use DP to access MUL/DIV registers::
 	PHK
 	PLB
+
+	STA	tmp
+	STX	tmp2
+
+	SEP	#$20
+.A8
+	JSR	Random__Rnd_U16Y
+	REP	#$20
+.A16
+
+	TYA
+	ASL
+	ADD	tmp2
+	TAX
+	LDA	f:MetaSpriteLayoutBank << 16, X
+	STA	z:EntityStruct::metaSpriteFrame
+
 
 	LDA	tmp
 	ASL
@@ -173,7 +207,6 @@ ROUTINE SetRandomVelocity
 .A8
 	PHY
 	JSR	Random__Rnd_U16Y
-
 	REP	#$20
 .A16
 
@@ -184,10 +217,8 @@ ROUTINE SetRandomVelocity
 
 	SEP	#$20
 .A8
-
 	PLY
 	JSR	Random__Rnd_U16Y
-
 	REP	#$20
 .A16
 
@@ -210,8 +241,8 @@ LABEL LargeAsteroid_InitData
 	.byte	$00, $00, $00			; xPos
 	.byte	$00, $00, $00			; yPos
 
-	.word	.loword(0)			; xVecl
-	.word	.loword(0)			; yVecl
+	.word	$0000				; xVecl
+	.word	$0000				; yVecl
 
 	.word	LARGE_SIZE			; width
 	.word	LARGE_SIZE			; height
@@ -228,8 +259,8 @@ LABEL MediumAsteroid_InitData
 	.byte	$00, $00, $00			; xPos
 	.byte	$00, $00, $00			; yPos
 
-	.word	.loword(256)			; xVecl
-	.word	.loword(0)			; yVecl
+	.word	$0000				; xVecl
+	.word	$0000				; yVecl
 
 	.word	MEDIUM_SIZE			; width
 	.word	MEDIUM_SIZE			; height
@@ -247,8 +278,8 @@ LABEL SmallAsteroid_InitData
 	.byte	$00, $00, $00			; xPos
 	.byte	$00, $00, $00			; yPos
 
-	.word	.loword(256)			; xVecl
-	.word	.loword(0)			; yVecl
+	.word	$0000				; xVecl
+	.word	$0000				; yVecl
 
 	.word	SMALL_SIZE			; width
 	.word	SMALL_SIZE			; height
