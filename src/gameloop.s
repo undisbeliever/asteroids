@@ -113,7 +113,7 @@ ROUTINE AttractMode
 
 .A8
 .I16
-ROUTINE	Process 
+ROUTINE	Process
 	JSR	MetaSprite__InitLoop
 
 LABEL GameLoop
@@ -142,14 +142,13 @@ ROUTINE	DrawEntity
 	; MetaSprite__ProcessMetaSprite_Y(dp->metaSpriteFrame, dp->metaSpriteCharAttr)
 
 	LDA	z:EntityStruct::xPos + 1
+	SUB	#SCREEN_WRAP_PADDING
 	STA	MetaSprite__xPos
 
 	LDA	z:EntityStruct::yPos + 1
+	SUB	#SCREEN_WRAP_PADDING
 	STA	MetaSprite__yPos
 
-	; ::TODO check if outside screen region::
-
-	; ::SHOULD replace with macro (xPos, yPos, frame, charattr are paraeters::
 	; ::SHOULDDO use DB = MetaSpriteLayoutBank, saves (n_entities + 4*obj - 7) cycles::
 	; ::: Will require MetaSpriteLayoutBank & $7F <= $3F::
 	LDX	z:EntityStruct::metaSpriteFrame
@@ -185,8 +184,6 @@ ROUTINE SetupScreen
 
 	LDA	#TM_BG3 | TM_OBJ
 	STA	TM
-
-	
 
 	RTS
 

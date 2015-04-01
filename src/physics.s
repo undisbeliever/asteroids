@@ -6,6 +6,7 @@
 .include "routines/block.h"
 
 .include "entity.h"
+.include "gameloop.h"
 
 MODULE Physics
 
@@ -44,12 +45,13 @@ Process_End_XPos:
 
 	LDA	z:EntityStruct::xPos + 1
 	IF_MINUS
-		ADC	#256
+		ADD	#256 + SCREEN_WRAP_PADDING
 		STA	z:EntityStruct::xPos + 1
 	ELSE
-		CMP	#256
+		CMP	#256 + SCREEN_WRAP_PADDING
 		IF_GE
-			SUB	#256
+			LDA	z:EntityStruct::xPos + 1
+			SUB	#256 + SCREEN_WRAP_PADDING
 			STA	z:EntityStruct::xPos + 1
 		ENDIF
 	ENDIF
@@ -81,12 +83,12 @@ Process_End_YPos:
 
 	LDA	z:EntityStruct::yPos + 1
 	IF_MINUS
-		ADC	#224
+		ADD	#224 + SCREEN_WRAP_PADDING
 		STA	z:EntityStruct::yPos + 1
 	ELSE
-		CMP	#224
+		CMP	#224 + SCREEN_WRAP_PADDING
 		IF_GE
-			SUB	#224
+			SUB	#224 + SCREEN_WRAP_PADDING
 			STA	z:EntityStruct::yPos + 1
 		ENDIF
 	ENDIF

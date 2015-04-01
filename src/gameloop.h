@@ -21,6 +21,8 @@ GAMELOOP_BG3_SIZE	= BGXSC_SIZE_32X32
 GAMELOOP_OAM_SIZE	= OBSEL_SIZE_8_16
 GAMELOOP_OAM_NAME	= 0
 
+;; Hidden area around screen.
+SCREEN_WRAP_PADDING = 32
 
 IMPORT_MODULE GameLoop
 	;; The player's current score
