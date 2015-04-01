@@ -20,6 +20,7 @@ MODULE GameLoop
 
 .segment "SHADOW"
 	UINT16	score
+	WORD	asteroidsToSpawn
 	WORD	playerStillAlive
 
 	UINT16	tmp
@@ -44,19 +45,31 @@ ROUTINE Init
 	Text_SetupWindow 10, 14, 22, 14, Text__WINDOW_NO_BORDER
 	Text_SetStringBasic
 
-	.assert * = SetupAsteroids, lderror, "Bad Flow"
+	LDA	#2
+	STA	asteroidsToSpawn
+	STZ	asteroidsToSpawn + 1
+
+	.assert * = SetupGameField, lderror, "Bad Flow"
 
 
-;; Sets up the game state
+
+;; Spawns the player and `asteroidsToSpawn` large asteroids.
 .A8
 .I16
-ROUTINE SetupAsteroids
-	REP	#$20
+ROUTINE SetupGameField
+	REP	#$30
 .A16
-.I16
 	JSR	Entity__Init
-	JSR	Asteroid__SpawnLargeAsteroid
-	JSR	Asteroid__SpawnLargeAsteroid
+
+	LDA	asteroidsToSpawn
+	REPEAT
+		PHA
+		JSR	Asteroid__SpawnLargeAsteroid
+		PLA
+		DEC
+	UNTIL_ZERO
+
+	JSR	Player__Init
 
 	SEP	#$20
 .A8
@@ -67,22 +80,50 @@ ROUTINE SetupAsteroids
 .A8
 .I16
 ROUTINE PlayGame
-	JSR	SetupAsteroids
-	JSR	Player__Init
+	; asteroidsToSpawn = 2
+	; score = 0
+	; playerStillAlive = true
+	; SetupGameField()
+	;
+	; Text__SelectWindow(0)
+	;
+	; repeat
+	;	Screen__WaitFrame()
+	;	ProcessFrame()
+	;	Text__SetCursor(0, 0)
+	;	Text__Print(score)
+	;
+	;	if Entity__firstActiveNpc == NULL
+	;		asteroidsToSpawn++
+	;		SetupGameField()
+	; until playerStillAlive == false
 
-	Text_SelectWindow 0
+	LDA	#2
+	STA	asteroidsToSpawn
+	STZ	asteroidsToSpawn + 1
 
 	STZ	score
 
 	LDA	#$FF
 	STA	playerStillAlive
 
+	JSR	SetupGameField
+
+	Text_SelectWindow 0
+
 	REPEAT
 		JSR	Screen__WaitFrame
-		JSR	Process
+		JSR	ProcessFrame
 
 		Text_SetCursor 0, 0
 		Text_PrintDecimal score, 4
+
+		LDX	Entity__firstActiveNpc
+		IF_ZERO
+			; run out of enemies, spawn more
+			INC	asteroidsToSpawn
+			JSR	SetupGameField
+		ENDIF
 
 		LDA	playerStillAlive
 	UNTIL_ZERO
@@ -93,6 +134,17 @@ ROUTINE PlayGame
 .A8
 .I16
 ROUTINE AttractMode
+	; Player__InitDummy()
+	; Text__SelectWindow(1)
+	; Text__Print("PRESS START")
+	;
+	; repeat
+	;	Screen__WaitFrame()
+	;	ProcessFrame()
+	;
+	; until Controler__pressed & JOY_START
+	; Text__ClearWindow()
+
 	JSR	Player__InitDummy
 
 	Text_SelectWindow 1
@@ -100,7 +152,7 @@ ROUTINE AttractMode
 
 	REPEAT
 		JSR	Screen__WaitFrame
-		JSR	Process
+		JSR	ProcessFrame
 
 		LDA	Controler__pressed + 1
 		AND	#JOYH_START
@@ -111,9 +163,11 @@ ROUTINE AttractMode
 	RTS
 
 
+
+;; Processes a single frame of a game loop
 .A8
 .I16
-ROUTINE	Process
+ROUTINE	ProcessFrame
 	JSR	MetaSprite__InitLoop
 
 LABEL GameLoop
