@@ -62,6 +62,13 @@ ROUTINE SetupGameField
 	JSR	Entity__Init
 
 	LDA	asteroidsToSpawn
+	CMP	#7
+	IF_GE
+		; The system experiences slowdown at 65 NPCs
+		; Limit the number of asteroids in play.
+		LDA	#7
+	ENDIF
+
 	REPEAT
 		PHA
 		JSR	Asteroid__SpawnLargeAsteroid
