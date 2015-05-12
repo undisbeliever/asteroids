@@ -464,20 +464,23 @@ EnterLoop:
 		;	a.x in range(b.x, b.x + b.width) | b.x in range(a.x, a.x + a.width) = 36 cycles
 		;	abs(a.x - b.x) < (a.width + b.width) / 2 = 43 cycles
 		;	a.x < b.x ? (a.x + a.width >= b.x) : (b.x + b.width >= a.x) = 25-33 cycles
+		;	a.x < b.x ? (a.x + a.width >= b.x) : (a.x - b.width < b.x) = 25-26 cycles
+
+
 
 
 		; 	if npc->xPos < player.xPos
-		;		if npc->x + npc->width < player.xPos
+		;		if npc->xPos + npc->width < player.xPos
 		;			goto NoCollision
 		; 	else
-		;		if player.xPos + player.width < npc->xPos
+		;		if npc->xPos - player.width >= player.xPos
 		;			goto NoCollision
 		;
-		; 	if npc->y < player.y
+		; 	if npc->yPos < player.yPos
 		;		if npc->yPos + npc->height < player.yPos
 		;			goto NoCollision
 		; 	else
-		;		if player.yPos + player.height < npc->yPos
+		;		if npc->yPos - player.height >= player.yPos
 		;			goto NoCollision
 		;
 		; 	CollisionRoutine(npc)
@@ -501,11 +504,10 @@ EnterLoop:
 			CMP	a:player + EntityStruct::xPos + 1
 			BLT	NoCollision
 		ELSE
-			LDA	a:player + EntityStruct::xPos + 1
-			CLC
-			ADC	a:player + EntityStruct::width
-			CMP	z:EntityStruct::xPos + 1
-			BLT	NoCollision
+			; carry set, A = npc->x
+			SBC	a:player + EntityStruct::width
+			CMP	a:player + EntityStruct::xPos + 1
+			BGE	NoCollision
 		ENDIF
 
 		LDA	z:EntityStruct::yPos + 1
@@ -515,11 +517,10 @@ EnterLoop:
 			CMP	a:player + EntityStruct::yPos + 1
 			BLT	NoCollision
 		ELSE
-			LDA	a:player + EntityStruct::yPos + 1
-			CLC
-			ADC	a:player + EntityStruct::height
-			CMP	z:EntityStruct::yPos + 1
-			BLT	NoCollision
+			; carry set, A = npc->y
+			SBC	a:player + EntityStruct::height
+			CMP	a:player + EntityStruct::yPos + 1
+			BGE	NoCollision
 		ENDIF
 
 		LDX	z:EntityStruct::functionsTable
@@ -547,18 +548,18 @@ EnterLoop:
 		; for y = firstActiveProjectile; y != NULL; y = projectiles[y]->nextEntity
 		;	if projectiles[y]->functionsTable
 		;		if npc->xPos < projectile[y]->xPos
-		;			if npc->x + npc->width < projectile[y]->xPos
+		;			if npc->xPos + npc->width < projectile[y]->xPos
 		;				continue
 		; 		else
-		;			if projectile[y]->xPos + projectile[y]->width < npc->xPos
+		;			if npc->xPos - projectile[y]->width >= projectile[y]->xPos
 		;				continue
 		;
-		;		if npc->y < projectile[y]->y
+		;		if npc->yPos < projectile[y]->yPos
 		;			if npc->yPos + npc->height < projectile[y]->yPos
 		;				continue
 		;		else
-		;			if projectile[y]->yPos + projectile[y]->height < npc->yPos
-		;			continue
+		;			if npc->yPos - projectile[y]->height >= projectile[y]->yPos
+		;				continue
 		;
 		;		projectile[y]->functionsTable->CollisionNpc(npc, y)
 		;		if !npc->functionsTable
@@ -582,11 +583,10 @@ EnterLoop:
 						CMP	a:EntityStruct::xPos + 1, Y
 						BLT	ContinueProjectileLoop
 					ELSE
-						LDA	a:EntityStruct::xPos + 1, Y
-						CLC
-						ADC	a:EntityStruct::width, Y
-						CMP	entityOffset + EntityStruct::xPos + 1
-						BLT	ContinueProjectileLoop
+						; carry set, A = entity->xPos
+						SBC	a:EntityStruct::width, Y
+						CMP	a:EntityStruct::xPos + 1, Y
+						BGE	ContinueProjectileLoop
 					ENDIF
 
 					LDA	entityOffset + EntityStruct::yPos + 1
@@ -597,11 +597,9 @@ EnterLoop:
 						CMP	a:EntityStruct::yPos + 1, Y
 						BLT	ContinueProjectileLoop
 					ELSE
-						LDA	a:EntityStruct::yPos + 1, Y
-						CLC
-						ADC	a:EntityStruct::height, Y
-						CMP	entityOffset + EntityStruct::yPos + 1
-						BLT	ContinueProjectileLoop
+						SBC	a:EntityStruct::height, Y
+						CMP	a:EntityStruct::yPos + 1, Y
+						BGE	ContinueProjectileLoop
 					ENDIF
 
 					STY	Entity__projectileTmp
