@@ -43,22 +43,19 @@
 .setcpu "65816"
 .include "includes/import_export.inc"
 .include "includes/structure.inc"
+.include "includes/config.inc"
 
 ;; Number of bytes allocated to an npc.
-;; ::TODO move into config.h::
-NPC_ENTITY_MALLOC = 40
+CONFIG NPC_ENTITY_MALLOC, 40
 
 ;; Number of npcs to allocate in shadow
-;; ::TODO move into config.h::
-N_ACTIVE_NPCS = 100
+CONFIG N_ACTIVE_NPCS, 100
 
 ;; Number of bytes allocated per player projectile.
-;; ::TODO move into config.h::
-PROJECTILE_ENTITY_MALLOC = 30
+CONFIG PROJECTILE_ENTITY_MALLOC, 30
 
 ;; Number of player projectiles
-;; ::TODO move into config.h::
-N_PROJECTILES = 3
+CONFIG N_PROJECTILES, 3
 
 ;; A table of functions used to handle behaviour of the player.
 .struct PlayerEntityFunctionsTable

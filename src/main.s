@@ -1,10 +1,5 @@
 ; Initialisation code
 
-.define VERSION 1
-.define REGION NTSC
-.define ROM_NAME "ASTEROIDS"
-
-.include "includes/sfc_header.inc"
 .include "includes/import_export.inc"
 .include "includes/registers.inc"
 .include "includes/structure.inc"
