@@ -253,19 +253,19 @@ ROUTINE SetupScreen
 
 .segment "BANK2"
 ObjectTiles:
-	.incbin	"resources/ship.4bpp"
-	.incbin	"resources/asteroids.4bpp"
-	.incbin	"resources/missile.4bpp"
+	.incbin	"resources/tiles4bpp/ship.4bpp"
+	.incbin	"resources/tiles4bpp/asteroids.4bpp"
+	.incbin	"resources/tiles4bpp/missile.4bpp"
 ObjectTiles_End:
 
 ObjectPalette:
-	.incbin	"resources/ship.clr"
-	.incbin	"resources/asteroids.clr"
-	.incbin	"resources/missile.clr"
+	.incbin	"resources/tiles4bpp/ship.clr"
+	.incbin	"resources/tiles4bpp/asteroids.clr"
+	.incbin	"resources/tiles4bpp/missile.clr"
 ObjectPalette_End:
 
 FontTiles:
-	.incbin	"snesdev-common/resources/font8x8-bold-transparent.2bpp"
+	.incbin	"snesdev-common/resources/tiles2bpp/font8x8-bold-transparent.2bpp"
 FontTiles_End:
 
 FontPalette:
