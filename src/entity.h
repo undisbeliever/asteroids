@@ -458,13 +458,10 @@ EnterLoop:
 		; --------
 		; The following is the fastest I can think of.
 		; for simple 1 dimensional ideas (16 bit A, DP.l != 0):
-		;	a.x in range(b.x, b.x + b.width) | b.x in range(a.x, a.x + a.width) = 36 cycles
-		;	abs(a.x - b.x) < (a.width + b.width) / 2 = 43 cycles
-		;	a.x < b.x ? (a.x + a.width >= b.x) : (b.x + b.width >= a.x) = 25-33 cycles
-		;	a.x < b.x ? (a.x + a.width >= b.x) : (a.x - b.width < b.x) = 25-26 cycles
-
-
-
+		;       a.left in range(b.left, b.left + b.width) | b.left in range(a.left, a.left + a.width) = 36 cycles
+		;       abs(a.left - b.left) < (a.width + b.width) / 2 = 43 cycles
+		;       a.left < b.left ? (a.left + a.width >= b.left) : (b.left + b.width >= a.left) = 12-40 cyles
+		;       a.left < b.left ? (a.left + a.width >= b.left) : (a.left - b.width < b.left) = 25-33 cycles
 
 		; 	if npc->xPos < player.xPos
 		;		if npc->xPos + npc->width < player.xPos
@@ -487,7 +484,6 @@ EnterLoop:
 		;		return
 		;
 
-		;; ::TODO assert .asize = 16::
 		.A16
 		.I16
 
@@ -502,9 +498,14 @@ EnterLoop:
 			BMI	NoCollision
 		ELSE
 			; carry set, A = npc->x
+			; a signed comparison is necessary as `npc->xPos - player.width` may be < 0
 			SBC	a:player + EntityStruct::width
 			CMP	a:player + EntityStruct::xPos + 1
-			BPL	NoCollision
+			IF_V_CLEAR
+				BPL	NoCollision
+			ELSE
+				BMI	NoCollision
+			ENDIF
 		ENDIF
 
 		LDA	z:EntityStruct::yPos + 1
@@ -515,9 +516,14 @@ EnterLoop:
 			BMI	NoCollision
 		ELSE
 			; carry set, A = npc->y
+			; a signed comparison is necessary as `npc->yPos - player.height` may be < 0
 			SBC	a:player + EntityStruct::height
 			CMP	a:player + EntityStruct::yPos + 1
-			BPL	NoCollision
+			IF_V_CLEAR
+				BPL	NoCollision
+			ELSE
+				BMI	NoCollision
+			ENDIF
 		ENDIF
 
 		LDX	z:EntityStruct::functionsTable
@@ -578,12 +584,18 @@ EnterLoop:
 						; carry clear, A = entity->xPos
 						ADC	entityOffset + EntityStruct::width
 						CMP	a:EntityStruct::xPos + 1, Y
-						BMI	ContinueProjectileLoop
+						BLT	ContinueProjectileLoop
 					ELSE
 						; carry set, A = entity->xPos
+						; a signed comparison is necessary as `entity->xPos - projectile[y]->width` may be < 0
 						SBC	a:EntityStruct::width, Y
-						CMP	a:EntityStruct::xPos + 1, Y
-						BPL	ContinueProjectileLoop
+						SEC
+						SBC	a:EntityStruct::xPos + 1, Y
+						IF_V_CLEAR
+							BPL	ContinueProjectileLoop
+						ELSE
+							BMI	ContinueProjectileLoop
+						ENDIF
 					ENDIF
 
 					LDA	entityOffset + EntityStruct::yPos + 1
@@ -594,9 +606,15 @@ EnterLoop:
 						CMP	a:EntityStruct::yPos + 1, Y
 						BMI	ContinueProjectileLoop
 					ELSE
+						; a signed comparison is necessary as `entity->yPos - projectile[y]->height` may be < 0
 						SBC	a:EntityStruct::height, Y
-						CMP	a:EntityStruct::yPos + 1, Y
-						BPL	ContinueProjectileLoop
+						SEC
+						SBC	a:EntityStruct::yPos + 1, Y
+						IF_V_CLEAR
+							BPL	ContinueProjectileLoop
+						ELSE
+							BMI	ContinueProjectileLoop
+						ENDIF
 					ENDIF
 
 					STY	Entity__projectileTmp
@@ -620,9 +638,6 @@ EnterLoop:
 			UNTIL_ZERO
 		ENDIF
 	.endmacro
-
-
-
 
 ENDMODULE
 
