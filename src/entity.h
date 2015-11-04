@@ -499,12 +499,12 @@ EnterLoop:
 			; carry clear, A = npc->x
 			ADC	z:EntityStruct::width
 			CMP	a:player + EntityStruct::xPos + 1
-			BSLT	NoCollision
+			BMI	NoCollision
 		ELSE
 			; carry set, A = npc->x
 			SBC	a:player + EntityStruct::width
 			CMP	a:player + EntityStruct::xPos + 1
-			BSGE	NoCollision
+			BPL	NoCollision
 		ENDIF
 
 		LDA	z:EntityStruct::yPos + 1
@@ -512,12 +512,12 @@ EnterLoop:
 		IF_LT
 			ADC	z:EntityStruct::height
 			CMP	a:player + EntityStruct::yPos + 1
-			BSLT	NoCollision
+			BMI	NoCollision
 		ELSE
 			; carry set, A = npc->y
 			SBC	a:player + EntityStruct::height
 			CMP	a:player + EntityStruct::yPos + 1
-			BSGE	NoCollision
+			BPL	NoCollision
 		ENDIF
 
 		LDX	z:EntityStruct::functionsTable
@@ -578,12 +578,12 @@ EnterLoop:
 						; carry clear, A = entity->xPos
 						ADC	entityOffset + EntityStruct::width
 						CMP	a:EntityStruct::xPos + 1, Y
-						BSLT	ContinueProjectileLoop
+						BMI	ContinueProjectileLoop
 					ELSE
 						; carry set, A = entity->xPos
 						SBC	a:EntityStruct::width, Y
 						CMP	a:EntityStruct::xPos + 1, Y
-						BSGE	ContinueProjectileLoop
+						BPL	ContinueProjectileLoop
 					ENDIF
 
 					LDA	entityOffset + EntityStruct::yPos + 1
@@ -592,11 +592,11 @@ EnterLoop:
 						; carry clear, A = entity->yPos
 						ADC	entityOffset + EntityStruct::height
 						CMP	a:EntityStruct::yPos + 1, Y
-						BSLT	ContinueProjectileLoop
+						BMI	ContinueProjectileLoop
 					ELSE
 						SBC	a:EntityStruct::height, Y
 						CMP	a:EntityStruct::yPos + 1, Y
-						BSGE	ContinueProjectileLoop
+						BPL	ContinueProjectileLoop
 					ENDIF
 
 					STY	Entity__projectileTmp
