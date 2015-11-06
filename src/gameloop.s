@@ -265,7 +265,7 @@ ObjectPalette:
 ObjectPalette_End:
 
 FontTiles:
-	.incbin	"snesdev-common/resources/tiles2bpp/font8x8-bold-transparent.2bpp"
+	.incbin	"resources/tiles2bpp/font8x8-bold-transparent.2bpp"
 FontTiles_End:
 
 FontPalette:

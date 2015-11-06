@@ -16,7 +16,6 @@ This month's entry focused on:
 
 Build Requirements
 ===================
- * snesdev-common
  * ca65
  * pcx2snes
  * gnu Make
