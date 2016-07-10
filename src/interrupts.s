@@ -40,7 +40,6 @@ ROUTINE VBlank
 	Text_VBlank
 
 	JSR	Controler__Update
-	JSR	Random__AddJoypadEntropy
 
 	; Load State
 	REP	#$30

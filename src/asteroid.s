@@ -64,11 +64,11 @@ ROUTINE	SpawnLargeAsteroid
 .I16
 	JSR	Random__Rnd
 
-	LDXY	Random__Seed
+	LDXY	Random__seed
 
 	REP	#$30
 .A16
-	LDA	Random__Seed + 2
+	LDA	Random__seed + 2
 	AND	#$007F
 	ADD	#256 - 128 / 2 - LARGE_SIZE / 2
 	AND	#$00FF

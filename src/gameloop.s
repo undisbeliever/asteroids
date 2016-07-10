@@ -6,6 +6,7 @@
 .include "routines/block.h"
 .include "routines/screen.h"
 .include "routines/metasprite.h"
+.include "routines/random.h"
 .include "routines/text.h"
 .include "routines/text8x8.h"
 
@@ -96,6 +97,7 @@ ROUTINE PlayGame
 	;
 	; repeat
 	;	Screen__WaitFrame()
+	;	Random__AddJoypadEntropy()
 	;	ProcessFrame()
 	;	Text__SetCursor(0, 0)
 	;	Text__Print(score)
@@ -120,6 +122,7 @@ ROUTINE PlayGame
 
 	REPEAT
 		JSR	Screen__WaitFrame
+		JSR	Random__AddJoypadEntropy
 		JSR	ProcessFrame
 
 		Text_SetCursor 0, 0
@@ -147,6 +150,7 @@ ROUTINE AttractMode
 	;
 	; repeat
 	;	Screen__WaitFrame()
+	;	Random__AddJoypadEntropy()
 	;	ProcessFrame()
 	;
 	; until Controler__pressed & JOY_START
@@ -159,6 +163,7 @@ ROUTINE AttractMode
 
 	REPEAT
 		JSR	Screen__WaitFrame
+		JSR	Random__AddJoypadEntropy
 		JSR	ProcessFrame
 
 		LDA	Controler__pressed + 1
