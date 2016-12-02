@@ -150,7 +150,6 @@ ROUTINE Process
 	ENDIF
 
 	; Limit Velocity
-	; ::SHOULDDO add fractional integer functions to math module::
 	SEP	#$20
 .A8
 

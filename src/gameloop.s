@@ -215,8 +215,6 @@ ROUTINE	DrawEntity
 	SUB	#SCREEN_WRAP_PADDING
 	STA	MetaSprite__yPos
 
-	; ::SHOULDDO use DB = MetaSpriteLayoutBank, saves (n_entities + 4*obj - 7) cycles::
-	; ::: Will require MetaSpriteLayoutBank & $7F <= $3F::
 	LDX	z:EntityStruct::metaSpriteFrame
 	LDY	z:EntityStruct::metaSpriteCharAttr
 

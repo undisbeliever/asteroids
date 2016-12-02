@@ -316,7 +316,6 @@ IMPORT_MODULE Entity
 			LDA	z:EntityStruct::nextEntity
 EnterLoop:
 			IF_ZERO
-				; ::MAYDO WHILEL structures::
 				JMP	BREAK_LABEL
 			ENDIF
 
@@ -382,7 +381,6 @@ EnterLoop:
 		; dp = firstActive
 		; while dp != NULL
 		;	if dp->functionsTable != 0
-		;		// ::TODO animation::
 		;		DrawEntityRoutine()
 		;
 		;		previousEntity = dp
@@ -408,8 +406,6 @@ EnterLoop:
 
 				LDX	z:EntityStruct::functionsTable
 				IF_NOT_ZERO
-					; ::TODO animation::
-
 					JSR	DrawEntityRoutine
 
 					TDC
