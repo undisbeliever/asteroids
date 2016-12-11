@@ -90,7 +90,7 @@ ROUTINE Process
 	; else
 	;	entity->metasprite = MetaSpriteFrameTable_Ship[rotationIndex]
 	;
-	; 
+	;
 	; if entity->xVecl * entity->xVecl + entity->yVecl * entity->yVecl >= MAX_VELOCITY * 2
 	;	entity->xVecl *= MAX_VELOCITY_RELATIVITY
 	;	entity->yVecl *= MAX_VELOCITY_RELATIVITY
