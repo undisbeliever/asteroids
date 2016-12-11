@@ -147,8 +147,6 @@ ROUTINE CollisionProjectile
 
 DestroyAsteroidWithShip:
 
-	; ::SOUND explosion::
-
 	LDA	z:EntityStruct::width
 	CMP	#LARGE_SIZE
 	IF_EQ
