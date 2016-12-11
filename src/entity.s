@@ -16,7 +16,7 @@ MODULE Entity
 	ADDR	firstActiveProjectile
 	ADDR	firstFreeProjectile
 
-	;; Object pool of npcs.
+	;; Object pool of NPCs.
 	;; Must be in shadow, accessed via direct page.
 	BYTE	npcPool, N_ACTIVE_NPCS * NPC_ENTITY_MALLOC
 

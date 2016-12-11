@@ -1,7 +1,7 @@
 Asteroids
 =========
 
-March's entry into my 1 Game Per Month Challange.
+March's entry into my 1 Game Per Month Challenge.
 
 <img src="screenshot.png?raw=true" alt="Asteroids Screenshot" width="512" height="448">
 

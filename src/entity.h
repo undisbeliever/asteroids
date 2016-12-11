@@ -5,7 +5,7 @@
 ;;	* collision detection
 ;;	* Physics Hook
 ;;
-;; This module manages entities in 3 seperate lists:
+;; This module manages entities in 3 separate lists:
 ;;	* Player
 ;;	* NPCs
 ;;	* Projectiles
@@ -21,7 +21,7 @@
 ;; The NPC and Projectiles memory is managed by this module.
 ;; An entity can be created with the `Entity__CreateNpc` and
 ;; `Entity__CreateProjectile` routines, will copy an existing Entity state
-;; from ROM into Shadow RAM and call the Entity's Init fuction.
+;; from ROM into Shadow RAM and call the Entity's Init function.
 ;;
 ;; The player Entity must be in a fixed location in RAM as there is only one of it.
 ;;
@@ -30,11 +30,11 @@
 ;;
 ;; `NPC_ENTITY_MALLOC` and `PROJECTILE_ENTITY_MALLOC` are allocated for each
 ;; Npc/Projctile no matter their type. The unused bytes are free to be used
-;; by the Entity's virtal functions. Implementations of the entity MUST
+;; by the Entity's virtual functions. Implementations of the entity MUST
 ;; NOT overflow their memory.
 ;;
 ;; The memory is managed by using two linked lists and moving the entity from the free
-;; list into the active list on createion, and moving the entity from active to free on
+;; list into the active list on creation, and moving the entity from active to free on
 ;; cleanup.
 
 .ifndef ::__ENTITY_H_
@@ -74,9 +74,9 @@ CONFIG N_PROJECTILES, 3
 	Physics			.addr
 .endstruct
 
-;; A table of functions used to handle behaviour of the npcs.
+;; A table of functions used to handle behaviour of the NPCs.
 .struct NpcEntityFunctionsTable
-	;; Called when npc is created.
+	;; Called when NPC is created.
 	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT: dp = EntityStruct address
 	Init			.addr
@@ -95,7 +95,7 @@ CONFIG N_PROJECTILES, 3
 	;; INPUT: dp = EntityStruct address
 	Physics			.addr
 
-	;; Called when the player collides with the npc
+	;; Called when the player collides with the NPC
 	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT:
 	;;	dp: EntityStruct NPC address
@@ -104,7 +104,7 @@ CONFIG N_PROJECTILES, 3
 	;; Called when an npc collides with a projectile
 	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT:
-	;;	dp: EntityStruct address of npc
+	;;	dp: EntityStruct address of NPC
 	;;	y: EntityStruct projectile address
 	CollisionProjectile	.addr
 .endstruct
@@ -129,7 +129,7 @@ CONFIG N_PROJECTILES, 3
 	;; INPUT: dp = EntityStruct address
 	Physics			.addr
 
-	;; Called when the projectile collides with a npc
+	;; Called when the projectile collides with an NPC
 	;; REQUIRES: 16 bit A, 16 bit Index
 	;; INPUT:
 	;;	dp: Npc address
@@ -178,46 +178,46 @@ CONFIG N_PROJECTILES, 3
 
 
 IMPORT_MODULE Entity
-	;; First npc in the active linked list.
+	;; First NPC in the active linked list.
 	ADDR	firstActiveNpc
-	;; First npc in the free linked list
+	;; First NPC in the free linked list
 	ADDR	firstFreeNpc
 
-	;; First prjectile in the active linked list.
+	;; First projectile in the active linked list.
 	ADDR	firstActiveProjectile
-	;; First prjectile in the free linked list
+	;; First projectile in the free linked list
 	ADDR	firstFreeProjectile
 
 	;; Stores projectile variable in _Entity__CheckNpcProjectileCollisions.
 	ADDR	projectileTmp
 
-	;; The prvious item in the linked list.
-	;; Used by render to free memory in a mark and sweek style list deletion.
+	;; The previous item in the linked list.
+	;; Used by render to free memory in a mark and sweep style list deletion.
 	ADDR	previousEntity
 
-	;; Initializes the npc and projectile object pool.
+	;; Initializes the NPC and projectile object pool.
 	;;
-	;; This MUST be called before using the Entity fuinctions.
+	;; This MUST be called before using the Entity functions.
 	;;
 	;; REQUIRES: DB shadow or $7E
 	ROUTINE	Init
 
-	;; Creates a new npc in the object pool.
+	;; Creates a new NPC in the object pool.
 	;;
 	;; Copies an init state of the object from from `InitNpcBank` to
 	;; WRAM.
 	;;
 	;; Then sets the entities X.Y position.
 	;;
-	;; Then calls the npc's Init function after data init.
+	;; Then calls the NPC's Init function after data init.
 	;;
 	;; REQUIRES: 16 bit A, 16 bit Index, DB shadow or $7E
 	;; INPUT:
-	;;	A: Address of a blank npc within bank `InitNpcBank`
+	;;	A: Address of a blank NPC within bank `InitNpcBank`
 	;;	X: xPosition
 	;;	Y: yPosition
 	;; OUTPUT:
-	;;	Y: the address of the allocated npc (NULL if not possible).
+	;;	Y: the address of the allocated NPC (NULL if not possible).
 	;;	z flag set if NPC could not be created
 	ROUTINE CreateNpc
 
@@ -236,7 +236,7 @@ IMPORT_MODULE Entity
 	;;	X: xPosition
 	;;	Y: yPosition
 	;; OUTPUT:
-	;;	Y: the address of the allocated npc (NULL if not possible).
+	;;	Y: the address of the allocated NPC (NULL if not possible).
 	;;	z flag set if NPC could not be created
 	ROUTINE CreateProjectile
 
@@ -343,7 +343,7 @@ EnterLoop:
 	;;
 	;; The entity will be removed from the active list if its functionsTable is NULL (0).
 	;;
-	;; The entitis are cleared by this routine as it could be problematic to clear them
+	;; The entities are cleared by this routine as it could be problematic to clear them
 	;; using the Process loop.
 	;;
 	;; REQUIRES: 16 bit A, 16 bit Index
@@ -438,16 +438,16 @@ EnterLoop:
 
 	;; Preforms a bounding box collision between the current entity (dp) and the player.
 	;;
-	;; If there is a collision, it will call CollisionRoutine THEN Entity Collision routine.
+	;; If there is a collision, it will call `CollisionRoutine` THEN Entity Collision routine.
 	;;
 	;; This macro ignores the fractional part of xPos/yPos
 	;;
 	;; REQUIRES: 16 bit A, 16 bit Index
 	;; PARAM:
 	;;	player: the address of the player's EntityStruct.
-	;;	EntityCollisionRoutine: the routine in the Entity's finction table to call if there is a collision
+	;;	EntityCollisionRoutine: the routine in the Entity's function table to call if there is a collision
 	;; INPUT:
-	;;	DP: address of npc
+	;;	DP: address of NPC
 	.macro Entity__CheckEntityPlayerCollision player, EntityCollisionRoutine
 
 		; Research

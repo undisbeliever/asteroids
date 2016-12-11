@@ -1,4 +1,4 @@
-;; Gameloop module, links the the various modules together.
+;; Gameloop module, links the various modules together.
 
 .ifndef ::__GAMELOOP_H_
 ::__GAMELOOP_H_ = 1

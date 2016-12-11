@@ -1,4 +1,3 @@
-;; Gameloop module, links the the various modules together.
 
 .ifndef ::__PLAYER_H_
 ::__PLAYER_H_ = 1
@@ -16,7 +15,7 @@ IMPORT_MODULE Player
 	;; REQUIRE: DB access shadow RAM
 	ROUTINE	Init
 
-	;; Initializes a dummy player that is offscreen.
+	;; Initializes a dummy player that is off-screen.
 	ROUTINE	InitDummy
 ENDMODULE
 

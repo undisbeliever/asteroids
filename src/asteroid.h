@@ -1,4 +1,3 @@
-;; Gameloop module, links the the various modules together.
 
 .ifndef ::__ASTEROID_H_
 ::__ASTEROID_H_ = 1
@@ -8,7 +7,7 @@
 
 IMPORT_MODULE Asteroid
 
-	;; Spawn a randonly placed Large Asteroid.
+	;; Spawn a randomly placed Large Asteroid.
 	ROUTINE	SpawnLargeAsteroid
 
 ENDMODULE

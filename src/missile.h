@@ -1,4 +1,3 @@
-;; Gameloop module, links the the various modules together.
 
 .ifndef ::__MISSILE_H_
 ::__MISSILE_H_ = 1

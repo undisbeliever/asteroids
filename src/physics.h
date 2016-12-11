@@ -1,4 +1,3 @@
-;; Physics module, links the the various modules together.
 
 .ifndef ::__PHYSICS_H_
 ::__PHYSICS_H_ = 1
