@@ -14,7 +14,6 @@ MODULE Physics
 .A16
 .I16
 ROUTINE ProcessEntity
-	;; ::DEBUG physics::
 
 	; ::KUDOS Khaz::
 	; ::: http://forums.nesdev.com/viewtopic.php?f=12&t=12459&p=142645#p142674 ::
