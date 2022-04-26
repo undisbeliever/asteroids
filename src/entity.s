@@ -136,7 +136,7 @@ ROUTINE Init
 		LDA	#size - 1
 
 		PHB
-		MVN	$7E, InitBank
+		MVN	#InitBank, #$7E
 		PLB
 
 		PLA
